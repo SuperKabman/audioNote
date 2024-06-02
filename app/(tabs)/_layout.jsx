@@ -5,21 +5,10 @@ import "nativewind";
 import { icons } from "@/constants/icons";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
-const { width } = Dimensions.get('window');
-const tabWidth = width / 3;
-
-const TabIcon = ({ icon, focused, index, currentIndex }) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: withTiming(currentIndex.value * tabWidth, { duration: 300 }) }],
-    };
-  });
+const TabIcon = ({ icon, focused}) => {
 
   return (
     <View className="flex items-center justify-center w-full h-full">
-      {focused && (
-        <Animated.View style={[animatedStyle]} className="absolute w-10 h-10 bg-white rounded-full z-[-1]" />
-      )}
       <Image
         source={icon}
         resizeMode="contain"
