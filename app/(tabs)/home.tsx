@@ -1,13 +1,14 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import { Link } from 'expo-router'
+import 'nativewind'
 
-const home = () => {
+const Home = () => {
   return (
     <View>
-      <Link href= '/recording'>Recording</Link>
+      <Link href= '/recording' className='items-center justify-center'>Recording</Link>
     </View>
   )
 }
 
-export default home
+export default Home

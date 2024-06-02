@@ -1,4 +1,4 @@
-import { View, Text, Image, Dimensions } from "react-native";
+import { View, Text, Image, Dimensions, Platform } from "react-native";
 import React from "react";
 import { Tabs } from "expo-router";
 import "nativewind";
@@ -36,6 +36,7 @@ const TabsLayout = () => {
           marginBottom: '5%',
           shadowColor: "transparent",
           margin: '5%',
+          padding: Platform === 'ios' ? '6%' : '0%',
         },
       }}
     >
