@@ -36,7 +36,7 @@ const TabsLayout = () => {
           marginBottom: '5%',
           shadowColor: "transparent",
           margin: '5%',
-          padding: Platform === 'ios' ? '6%' : '0%',
+          padding: Platform.OS === 'ios' ? '6%' : '0%',
         },
       }}
     >
