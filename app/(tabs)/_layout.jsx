@@ -16,8 +16,9 @@ const styles = StyleSheet.create({
   iconContainerFocused: {
     margin: '5%',
     width: '60%',
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     borderRadius: 30,
+    zIndex: 1, // Ensure it's above other elements
   },
   icon: {
     width: 32,
@@ -27,17 +28,18 @@ const styles = StyleSheet.create({
 
 const TabIcon = ({ icon, focused }) => {
   return (
-    <View style = {[styles.iconContainer, focused && styles.iconContainerFocused]}>
+    <View style={[styles.iconContainer, focused && styles.iconContainerFocused]}>
       <Image
         source={icon}
         resizeMode="contain"
         tintColor={focused ? "black" : "white"}
         style={styles.icon}
-        // className="w-32 h-32"
       />
     </View>
   );
 };
+
+
 const TabsLayout = () => {
   const currentIndex = useSharedValue(1);
 
