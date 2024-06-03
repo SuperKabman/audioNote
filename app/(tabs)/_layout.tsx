@@ -16,9 +16,8 @@ const styles = StyleSheet.create({
   iconContainerFocused: {
     margin: '5%',
     width: '60%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'white',
     borderRadius: 30,
-    zIndex: 1, // Ensure it's above other elements
   },
   icon: {
     width: 32,
@@ -26,9 +25,14 @@ const styles = StyleSheet.create({
   },
 });
 
-const TabIcon = ({ icon, focused }) => {
+interface TabIconProps {
+  icon: any;
+  focused: boolean;
+}
+
+const TabIcon : React.FC<TabIconProps> = ({ icon, focused }) => {
   return (
-    <View style={[styles.iconContainer, focused && styles.iconContainerFocused]}>
+    <View style = {[styles.iconContainer, focused && styles.iconContainerFocused]}>
       <Image
         source={icon}
         resizeMode="contain"
@@ -38,10 +42,7 @@ const TabIcon = ({ icon, focused }) => {
     </View>
   );
 };
-
-
 const TabsLayout = () => {
-  const currentIndex = useSharedValue(1);
 
   return (
       <Tabs
@@ -67,8 +68,6 @@ const TabsLayout = () => {
                 <TabIcon
                   icon={icons.chat}
                   focused={focused}
-                  index={0}
-                  currentIndex={currentIndex}
                 />
               );
             },
@@ -83,8 +82,6 @@ const TabsLayout = () => {
                 <TabIcon
                   icon={icons.home}
                   focused={focused}
-                  index={1}
-                  currentIndex={currentIndex}
                 />
               );
             },
@@ -98,8 +95,6 @@ const TabsLayout = () => {
                 <TabIcon
                   icon={icons.files}
                   focused={focused}
-                  index={2}
-                  currentIndex={currentIndex}
                 />
               );
             },
