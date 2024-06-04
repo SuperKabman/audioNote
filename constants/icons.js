@@ -6,4 +6,5 @@ export const icons = {
     pause: require("../assets/images/pauseButton.png"),
     stop: require("../assets/images/stopButton.png"),
     blob: require("../assets/images/blob_1.gif"),
+    profile: require("../assets/images/profileIcon.png"),
 };
