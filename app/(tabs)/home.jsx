@@ -10,7 +10,7 @@ const Home = () => {
 
   const handlePress = () => {
     startRecording();
-    navigation.navigate('recording');
+    navigation.navigate('recording_test');
   }
 
   return (
