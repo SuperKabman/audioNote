@@ -19,7 +19,7 @@ const Home = () => {
         onPress={handlePress}
         style={{ alignItems: 'center', justifyContent: 'center' }}
       >
-        <Image source={require('@/assets/images/blob_1.gif')} style = {{width: 400, height: 400}} />
+        <Image source={require('@/assets/images/blob.gif')} style = {{width: 400, height: 400}} />
       </TouchableOpacity>
     </View>
   );
