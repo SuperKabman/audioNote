@@ -1,31 +1,29 @@
-import { View, Text, Alert } from 'react-native'
-import React from 'react'
-import { Link } from 'expo-router'
-import 'nativewind'
-import useStartRecording from '@/components/startRecording.jsx'
-
-const RecordingLink = ({ startRecording, ...props }) => {
-  const handleClick = (e) => {
-    e.preventDefault();
-    startRecording();
-  };
-
-  return <Link {...props} onClick={handleClick} />;
-};
+import { View, Text, Alert, TouchableOpacity, Image } from "react-native";
+import { useNavigation } from "expo-router";
+import React from "react";
+import "nativewind";
+import useStartRecording from "@/components/startRecording";
 
 const Home = () => {
-  
+  const { startRecording, recording, progress } = useStartRecording();
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    startRecording();
+    navigation.navigate('recording');
+  }
 
   return (
-    
-    
     <View>
-      {console.log('recording started')}
-      <RecordingLink href='/recording' onClick={useStartRecording()} className='items-center justify-center'>Recording</RecordingLink>
-      {console.log('recording stopped')}
+      <TouchableOpacity
+        onPress={handlePress}
+        style={{ alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Image source={require('@/assets/images/blob_1.gif')} style = {{width: 400, height: 400}} />
+      </TouchableOpacity>
     </View>
-    
-  )
-}
+  );
+};
 
-export default Home
+
+export default Home;

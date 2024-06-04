@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../config";
+import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
 import React, { useState, useEffect } from "react";
 
 import {
@@ -10,30 +10,15 @@ import {
   Alert,
   Platform,
 } from "react-native";
-import * as FileSystem from "expo-file-system";
-import * as Permissions from "expo-permissions";
-import * as Sharing from "expo-sharing";
 import axios from "axios";
 
 
 const openai = new OpenAI({
     apiKey: API_KEY,
   });
-  
-
-const getPermissions = async () => {
-    const { status: micStatus } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
-    const { status:storageStatus} = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
-    if (micStatus !== "granted" || storageStatus !== "granted") {
-      Alert.alert(
-        "Permissions Denied",
-        "This app requires microphone and storage permissions to function correctly.",
-        [{ text: "OK" }]
-      );
-    }
-  };
 
 async function stopRecording() {
+    console.log("stop recording works!!!");
     const [uri, setUri] = useState("");
     const [recording, setRecording] = useState(null);
     

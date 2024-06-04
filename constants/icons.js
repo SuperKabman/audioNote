@@ -5,4 +5,5 @@ export const icons = {
     start: require("../assets/images/playButton.png"),
     pause: require("../assets/images/pauseButton.png"),
     stop: require("../assets/images/stopButton.png"),
+    blob: require("../assets/images/blob_1.gif"),
 };

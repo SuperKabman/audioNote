@@ -19,9 +19,11 @@ const styles = StyleSheet.create({
 });
 
 const Recording = () => {
+
   const handlePress = () => {
-    stopRecording;
+    stopRecording();
   }
+
   return (
     <View style={styles.container}>
       <TouchableOpacity >

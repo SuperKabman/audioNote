@@ -4,34 +4,32 @@ import { Link } from 'expo-router'
 import 'nativewind'
 import { Audio } from "expo-av";
 import axios from "axios";
-import * as Permissions from "expo-permissions";
+import * as MediaLibrary from "expo-media-library";
 
-const getPermissions = () => {
-  Permissions.askAsync(Permissions.AUDIO_RECORDING)
-    .then(({ status: micStatus }) => {
-      return Permissions.askAsync(Permissions.MEDIA_LIBRARY).then(
-        ({ status: storageStatus }) => ({ micStatus, storageStatus })
+const getPermissions = async () => {
+  try {
+    const { status: micStatus } = await Audio.requestPermissionsAsync();
+    const { status: storageStatus } = await MediaLibrary.requestPermissionsAsync();
+
+    if (micStatus !== "granted" || storageStatus !== "granted") {
+      Alert.alert(
+        "Permissions Denied",
+        "This app requires microphone and storage permissions to function correctly.",
+        [{ text: "OK" }]
       );
-    })
-    .then(({ micStatus, storageStatus }) => {
-      if (micStatus !== "granted" || storageStatus !== "granted") {
-        Alert.alert(
-          "Permissions Denied",
-          "This app requires microphone and storage permissions to function correctly.",
-          [{ text: "OK" }]
-        );
-      }
-    })
-    .catch((err) => {
-      console.error("Failed to get permissions", err);
-    });
+    }
+  } catch (err) {
+    console.error("Failed to get permissions", err);
+  }
 };
 
 export default function useStartRecording() {
+  
   const [recording, setRecording] = useState(null);
   const [progress, setProgress] = useState(0);
 
   const startRecording = () => {
+    console.log('it worked!!!!!!!!');
     getPermissions();
     Audio.requestPermissionsAsync()
       .then(() => {
