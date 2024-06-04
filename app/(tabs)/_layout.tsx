@@ -13,16 +13,33 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  iconContainerFocused: {
+  iconContainerFocusedIOS: {
+    margin: '50%',
+    width: '70%',
+    height:'10%',
+    backgroundColor: 'white',
+    borderRadius: 30,
+    paddingBottom:40,
+    paddingTop:10,
+    marginBottom:60,
+  },
+  iconContainerFocusedAndroid: {
     margin: '5%',
     width: '60%',
     backgroundColor: 'white',
     borderRadius: 30,
   },
-  icon: {
+  icon: {  
     width: 32,
     height: 32,
+    marginBottom: Platform.OS === "ios" ? "12%" : "0%",
+    
   },
+  iconFocused: {
+    width:32,
+    height:32,
+    marginTop: Platform.OS === "ios" ? "40%" : "0%",
+  }
 });
 
 interface TabIconProps {
@@ -31,16 +48,29 @@ interface TabIconProps {
 }
 
 const TabIcon : React.FC<TabIconProps> = ({ icon, focused }) => {
-  return (
-    <View style = {[styles.iconContainer, focused && styles.iconContainerFocused]}>
-      <Image
-        source={icon}
-        resizeMode="contain"
-        tintColor={focused ? "black" : "white"}
-        style={styles.icon}
-      />
-    </View>
-  );
+  if (Platform.OS === 'ios') {
+    return (
+      <View style = {[styles.iconContainer, focused && styles.iconContainerFocusedIOS]}>
+        <Image
+          source={icon}
+          resizeMode="contain"
+          tintColor={focused ? "black" : "white"}
+          style={(focused ? styles.iconFocused : styles.icon)}
+        />
+      </View>
+    );
+  } else {
+    return (
+      <View style = {[styles.iconContainer, focused && styles.iconContainerFocusedAndroid]}>
+        <Image
+          source={icon}
+          resizeMode="contain"
+          tintColor={focused ? "black" : "white"}
+          style={styles.icon}
+        />
+      </View>
+    );
+  }
 };
 const TabsLayout = () => {
 
@@ -55,8 +85,8 @@ const TabsLayout = () => {
             height: "7%",
             marginBottom: "5%",
             shadowColor: "transparent",
-            margin: "5%",
-            padding: Platform.OS === "ios" ? "6%" : "0%",
+            margin: Platform.OS === "ios" ? "10%" : "5%",
+            padding: Platform.OS === "ios" ? "10%" : "0%",
           },
         }}
       >
