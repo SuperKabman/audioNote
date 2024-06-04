@@ -101,6 +101,7 @@ const TabsLayout = () => {
                 />
               );
             },
+            headerShown: false,
           }}
         />
 
@@ -115,6 +116,7 @@ const TabsLayout = () => {
                 />
               );
             },
+            headerShown: false,
           }}
         />
         <Tabs.Screen
@@ -128,6 +130,7 @@ const TabsLayout = () => {
                 />
               );
             },
+            headerShown: false,
           }}
         />
       </Tabs>

@@ -21,6 +21,7 @@ import OpenAI from "openai";
 import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 // let recording = new Audio.Recording();
 
 const openai = new OpenAI({
@@ -260,9 +261,9 @@ export default function App() {
     <View style = {{flex:1 , justifyContent: 'flex-end', marginBottom : 36, marginHorizontal: '15%'}}>
       <View style = {{ flexDirection: 'row', justifyContent: 'space-between'}}>
       <TouchableOpacity onPress={stopRecording}>
-        <Image source={require('../assets/images/stopButton.png')} style = {{width: 100, height: 100}} />
+      <Image source={require('../assets/images/stopButton.png')} style = {{width : 100, height: 100}} />
       </TouchableOpacity>
-      <Image source={require('../assets/images/blob.gif')} style = {{width: 100, height: 100}} />
+      <Image source={require('../assets/images/blob_1.gif')} style = {{width: 100, height: 100}} />
       <Image source={require('../assets/images/stopButton.png')} style = {{width: 100, height: 100}} />
       </View>
     </View>
