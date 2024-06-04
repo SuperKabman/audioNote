@@ -7,7 +7,7 @@ const Home = () => {
   const navigation = useNavigation();
 
   const handlePress = () => {
-    navigation.navigate('previousRecording');
+    navigation.navigate('recording');
   }
 
   return (

@@ -1,5 +1,3 @@
-// import { AppRegistry } from "react-native";
-// AppRegistry.registerComponent(appName, () => App());
 import React, { useState, useEffect } from "react";
 
 import {
@@ -9,6 +7,7 @@ import {
   Text,
   Alert,
   Platform,
+  Image,
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import * as FileSystem from "expo-file-system";
@@ -17,13 +16,10 @@ import * as Sharing from "expo-sharing";
 import { Audio } from "expo-av";
 import axios from "axios";
 import { NativeModules } from "react-native";
-//import { manipulateAsync } from 'expo-image-manipulator';
 
 import OpenAI from "openai";
 import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
-// import { RNFFmpeg } from 'react-native-ffmpeg';
-//const fs = require('fs');
-//const filePath = '/Users/kabir/AudioNote/transcription-server/transcriptionFile(s)/transcription.txt';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // let recording = new Audio.Recording();
 
@@ -63,21 +59,6 @@ export default function App() {
       );
     }
   };
-
-  // const audioAmplify = async (inputFilePath, outputFilePath, amplificationFactor) => {
-  //   try {
-  //     const ffmpegCommand = `-i ${inputFilePath} -filter:a "volume=${amplificationFactor}" ${outputFilePath}`;
-  //     const { rc } = await RNFFmpeg.execute(ffmpegCommand);
-
-  //     if (rc === 0) {
-  //       console.log("Audio amplified successfully");
-  //     } else {
-  //       console.error("Failed to amplify audio");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error amplifying audio:", error);
-  //   }
-  // }
 
   const fetchTranscription = async () => {
     try {
@@ -176,6 +157,7 @@ export default function App() {
       console.error("Failed to stop recording", err);
     }
   }
+
   async function playRecording() {
     try {
       if (uri) {
@@ -254,7 +236,6 @@ export default function App() {
         staysActiveInBackground: true,
       });
     }
-
     return sound
       ? () => {
           console.log("Unloading sound...");
@@ -263,72 +244,28 @@ export default function App() {
       : undefined;
   }, [recording, sound]);
 
+  useEffect(() => {
+    const startRecordingIfNotAlreadyStarted = async () => {
+      const recordingStarted = await AsyncStorage.getItem('recordingStarted');
+      if (!recordingStarted) {
+        await startRecording();
+        await AsyncStorage.setItem('recordingStarted', 'true');
+      }
+    };
+  
+    startRecordingIfNotAlreadyStarted();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <View style={styles.recorder}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={recording ? stopRecording : startRecording}
-        >
-          <Text>{recording ? "Stop Recording" : "Start Recording"}</Text>
-        </TouchableOpacity>
-        <Text>Recording Progress: {progress.toFixed(2)} s</Text>
-        {uri ? (
-          <>
-            <TouchableOpacity style={styles.button} onPress={playRecording}>
-              <Text>Play Recording</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={shareRecording}>
-              <Text>Share Recording</Text>
-            </TouchableOpacity>
-          </>
-        ) : null}
-      </View>
-      <View style={styles.responseContainer}>
-        <Text>Generated Response:</Text>
-        <Text>{generatedResponse}</Text>
-      </View>
-      {/* <View style={styles.gain}>
-        <Text>Mic Gain</Text>
-        <Slider
-          style={{ width: 200, height: 40 }}
-          minimumValue={0}
-          maximumValue={10}
-          value={gainValue}
-          onValueChange={(value) => setGainValue(value)}
-          step={0.1}
-        />
-        <Text>{gainValue.toFixed(1)}</Text>
-      </View> */}
-      <TouchableOpacity style={styles.button} onPress={handleResetFile}>
-        <Text>Reset</Text>
+    <View style = {{flex:1 , justifyContent: 'flex-end', marginBottom : 36, marginHorizontal: '15%'}}>
+      <View style = {{ flexDirection: 'row', justifyContent: 'space-between'}}>
+      <TouchableOpacity onPress={stopRecording}>
+        <Image source={require('../assets/images/stopButton.png')} style = {{width: 100, height: 100}} />
       </TouchableOpacity>
+      <Image source={require('../assets/images/blob.gif')} style = {{width: 100, height: 100}} />
+      <Image source={require('../assets/images/stopButton.png')} style = {{width: 100, height: 100}} />
+      </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  recorder: {
-    marginBottom: 20,
-  },
-  responseContainer: {
-    marginVertical: 20,
-    alignItems: "center",
-  },
-  button: {
-    backgroundColor: "#ccc",
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
-  },
-  gain: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-});
