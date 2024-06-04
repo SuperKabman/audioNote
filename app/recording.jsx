@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
-
+import stopRecording from '../components/stopRecording';
 
 
 const styles = StyleSheet.create({
@@ -19,6 +19,9 @@ const styles = StyleSheet.create({
 });
 
 const Recording = () => {
+  const handlePress = () => {
+    stopRecording;
+  }
   return (
     <View style={styles.container}>
       <TouchableOpacity >
@@ -27,7 +30,7 @@ const Recording = () => {
           source={require('../assets/images/startButton.png')}
         />
       </TouchableOpacity>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={handlePress}>
         <Image
           style={styles.button}
           source={require('../assets/images/stopButton.png')}
