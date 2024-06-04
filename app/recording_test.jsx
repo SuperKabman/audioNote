@@ -14,6 +14,8 @@ import * as MediaLibrary from "expo-media-library";
 import { Audio } from "expo-av";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
+let recording = new Audio.Recording();
+
 const recording_test = () => {
   const getPermissions = async () => {
     try {
@@ -35,11 +37,22 @@ const recording_test = () => {
     }
   };
 
-  const [recording, setRecording] = useState(null); //used to store the data about the recording
+  //const [recording, setRecording] = useState(null); //used to store the data about the recording
   const [progress, setProgress] = useState(0);
   const [generatedResponse, setGeneratedResponse] = useState("");
   const [fileData, setFileData] = useState(""); // used to store the data about the transcription
   const [uri, setUri] = useState("");
+
+  const cleanupRecording = async () => {
+    if (recording) {
+      try {
+        await recording.stopAndUnloadAsync();
+        setRecording(null);
+      } catch (error) {
+        console.error("Failed to stop and unload recording", error);
+      }
+    }
+  };
 
   async function startRecording() {
     try {
@@ -48,8 +61,6 @@ const recording_test = () => {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-
-      const recording_ = new Audio.Recording();
 
       const recordingOptions = {
         android: {
@@ -72,23 +83,10 @@ const recording_test = () => {
         },
       };
 
-      console.log("log 1");
-
-      await recording_.prepareToRecordAsync(recordingOptions);
-
-      console.log("log 2");
-      recording_.setOnRecordingStatusUpdate((status) => {
-        setProgress(status.durationMillis / 1000);
-      });
-
-      console.log("log 3");
-
-      recording_.setProgressUpdateInterval(100);
-
-      console.log("log 4");
-      await recording_.startAsync();
+      await recording.prepareToRecordAsync(recordingOptions);
+      console.log("Recording prepared");
+      await recording.startAsync();
       console.log("Recording started");
-      setRecording(recording_);
     } catch (err) {
       console.error("Failed to start recording", err);
     }
