@@ -13,7 +13,7 @@ import Slider from "@react-native-community/slider";
 import * as FileSystem from "expo-file-system";
 import * as Permissions from "expo-permissions";
 import * as Sharing from "expo-sharing";
-import { Audio } from "expo-av";
+import { Audio, ResizeMode } from "expo-av";
 import axios from "axios";
 import { NativeModules } from "react-native";
 
@@ -246,6 +246,7 @@ export default function App() {
       : undefined;
   }, [recording, sound]);
 
+  //TODO: FIX THIS FUNCTION IT CURRENTLY ONLY WORKS ONCE
   useEffect(() => {
     const startRecordingIfNotAlreadyStarted = async () => {
       const recordingStarted = await AsyncStorage.getItem('recordingStarted');
@@ -259,13 +260,19 @@ export default function App() {
   }, []);
 
   return (
-    <View style = {{flex:1 , justifyContent: 'flex-end', marginBottom : 36, marginHorizontal: '15%'}}>
-      <View style = {{ flexDirection: 'row', justifyContent: 'space-between'}}>
-      <TouchableOpacity onPress={stopRecording}>
-      <Image source={require('../assets/images/stopButton.png')} style = {{width : 100, height: 100}} />
-      </TouchableOpacity>
-      <Image source={require('../assets/images/blob_1.gif')} style = {{width: 100, height: 100}} />
-      <Image source={require('../assets/images/stopButton.png')} style = {{width: 100, height: 100}} />
+    <View style={{ flex: 1, justifyContent: 'flex-end', marginHorizontal: '5%' }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <TouchableOpacity onPress={stopRecording}>
+            <Image source={require('../assets/images/stopButton.png')} style={{ width: '100%', height: '100%' }} resizeMode='contain' />
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Image source={require('../assets/images/blob_1.gif')} style={{ width: '100%', height: '100%' }} resizeMode='contain' />
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Image source={require('../assets/images/stopButton.png')} style={{ width: '100%', height: '100%' }} resizeMode='contain' />
+        </View>
       </View>
     </View>
   );

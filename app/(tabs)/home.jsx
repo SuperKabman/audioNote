@@ -18,6 +18,7 @@ const Home = () => {
 
   return (
     <SafeAreaView style = {{flex : 1}}>
+    <SafeAreaView style = {{flex : 1}}>
       <TouchableOpacity
         onPress={handlePress}
         style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -28,7 +29,9 @@ const Home = () => {
       <TouchableOpacity
         onPress={handleProfile}>
         <Image source={icons.profile} style = {{top:'-750%', left:'80%'}} />
+        <Image source={icons.profile} style = {{top:'-750%', left:'80%'}} />
       </TouchableOpacity>
+    </SafeAreaView>
     </SafeAreaView>
   );
 };
