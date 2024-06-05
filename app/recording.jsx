@@ -8,6 +8,7 @@ import {
   Alert,
   Platform,
   Image,
+  SafeAreaView,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
@@ -18,18 +19,13 @@ import OpenAI from "openai";
 import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
 import * as MediaLibrary from "expo-media-library";
 
-
-
-// let recording = new Audio.Recording();
-
 const openai = new OpenAI({
   apiKey: API_KEY,
 });
 
 export default function App() {
-  const [recording, setRecording] = useState(null);
+  const [recordingVar, setRecordingVar] = useState(null);
   const [sound, setSound] = useState(null);
-  const [progress, setProgress] = useState(0);
   const [gainValue, setGainValue] = useState(1);
   const [uri, setUri] = useState("");
   const [generatedResponse, setGeneratedResponse] = useState("");
@@ -40,18 +36,19 @@ export default function App() {
 
   useEffect(() => {
     getPermissions();
-    // fetchTranscription();
+    fetchTranscription();
   }, []);
 
   const getPermissions = async () => {
     const { status: micStatus } = await Audio.requestPermissionsAsync();
-    const { status: storageStatus } = await MediaLibrary.requestPermissionsAsync();
-    
-    if (micStatus !== 'granted' || storageStatus !== 'granted') {
+    const { status: storageStatus } =
+      await MediaLibrary.requestPermissionsAsync();
+
+    if (micStatus !== "granted" || storageStatus !== "granted") {
       Alert.alert(
-        'Permissions Denied',
-        'This app requires microphone and storage permissions to function correctly.',
-        [{ text: 'OK' }]
+        "Permissions Denied",
+        "This app requires microphone and storage permissions to function correctly.",
+        [{ text: "OK" }]
       );
     }
   };
@@ -70,6 +67,11 @@ export default function App() {
   };
 
   async function startRecording() {
+    if (recordingVar) {
+      console.log("stopping previous recording with the recording variable as ", recordingVar);
+      await stopRecording();
+    }
+
     try {
       await Audio.requestPermissionsAsync();
       await Audio.setAudioModeAsync({
@@ -100,59 +102,53 @@ export default function App() {
 
       const { recording } = await Audio.Recording.createAsync(
         recordingOptions,
-        (status) => setProgress(status.durationMillis / 1000)
       );
-
       console.log("Recording started");
-
-      recording.setProgressUpdateInterval(100);
       recording.setOnRecordingStatusUpdate((status) => {
-        setProgress(status.durationMillis / 1000);
-        setRecording(recording);
+        setRecordingVar(recording);
       });
     } catch (err) {
       console.error("Failed to start recording", err);
     }
   }
 
-  async function stopRecording() {
+  const stopRecording = async () => {
+    console.log("entered the stop recording function");
+    console.log(recordingVar);
     try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      console.log("Recording stopped and stored at", uri);
+        await recordingVar.stopAndUnloadAsync();
+        const uri = recordingVar.getURI();
+        console.log("Recording stopped and stored at", uri);
+        setUri(uri);
+        setRecordingVar(null);
+        console.log("Transcribing audio...");
+        const formData = new FormData();
+        formData.append("audio", {
+          uri,
+          type: Platform.OS === "ios" ? "audio/x-caf" : "audio/mp4",
+          name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
+        });
 
-      setUri(uri);
-
-      console.log("Transcribing audio...");
-      const formData = new FormData();
-      formData.append("audio", {
-        uri,
-        type: Platform.OS === "ios" ? "audio/x-caf" : "audio/mp4",
-        name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
-      });
-
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/transcribe`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+        const response = await axios.post(
+          `http://${IP_ADDRESS}:3000/transcribe`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        const transcription = response.data.transcription;
+        console.log("Transcription:", transcription);
+        fetchTranscription();
+        if (isListening) {
+          startRecording();
         }
-      );
-      const transcription = response.data.transcription;
-      console.log("Transcription:", transcription);
-      //setGeneratedResponse(transcription);
-
-      console.log("Audio transcription complete.");
-      generateResponse(transcription);
-      fetchTranscription();
-      setRecording(null);
-      setProgress(0);
-    } catch (err) {
+      }
+     catch (err) {
       console.error("Failed to stop recording", err);
     }
-  }
+  };
 
   async function playRecording() {
     try {
@@ -220,8 +216,9 @@ export default function App() {
     }
   };
 
+  // use effect for recording parameteres
   useEffect(() => {
-    if (recording) {
+    if (recordingVar) {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
@@ -233,38 +230,137 @@ export default function App() {
       });
     }
     return sound
-      ? () => {
+    ? async () => {
+        if (!recordingVar) {
           console.log("Unloading sound...");
-          sound.unloadAsync();
+          await sound.unloadAsync();
         }
-      : undefined;
-  }, [recording, sound]);
+      }
+    : undefined;
+}, [recordingVar, sound]);
 
+
+  // use effect to start the recording as soon as the page loads
   useEffect(() => {
     const initializeRecording = async () => {
+      console.log("Initializing recording...");
       startRecording();
     };
 
     initializeRecording();
   }, []);
 
+  // use effect for the timer
+  const [progress, setProgress] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [intervalId, setIntervalId] = useState(null);
+  const [isListening, setIsListening] = useState(true); // for when the app is recording
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!isPaused) {
+        setProgress((prevProgress) => prevProgress + 1);
+      }
+    }, 1000);
+    setIntervalId(id);
+    return () => clearInterval(id);
+  }, [isPaused]);
+  
+  const pauseTimer = () => {
+    setIsPaused(true);
+  };
+  
+  const resumeTimer = () => {
+    setIsPaused(false);
+  };
+
+  const handleRecordingCycle = async () => {
+    
+      console.log("stopping previous recording");
+      await startRecording();
+  
+    // await startRecording();
+  };
+  
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (isListening && !isPaused) {
+        await handleRecordingCycle();
+      }
+    }, 10000);
+  
+    return () => clearInterval(interval);
+  }, [isListening, isPaused]);
+
+  const handleStopButton = async () => {
+    setIsListening(false);
+    if (recordingVar) {
+      await stopRecording();
+    }
+  };
+
   return (
-    <View style={{ flex: 1, justifyContent: 'flex-end', marginHorizontal: '5%', marginBottom: "2%" }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <TouchableOpacity onPress={stopRecording}>
-            <Image source={require('../assets/images/stopButton.png')} style={{ width: 70, height: 70 }} resizeMode='contain' />
-          </TouchableOpacity>
-        </View>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Image source={require('../assets/images/blob_1.gif')} style={{ width: 110, height: 110 }} resizeMode='contain' />
-          <Text style={{ fontFamily: 'IBMPlexMono-Regular', position: 'absolute', top: '37%', left: '37%', color: 'white', fontSize: 16 }}>{Math.floor(progress / 60)}:{progress % 60 < 10 ? '0' : ''}{Math.floor(progress % 60)}</Text>
-        </View>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Image source={require('../assets/images/stopButton.png')} style={{ width: 70, height: 70 }} resizeMode='contain' />
+    <SafeAreaView style={{ flex: 1 }}>
+      <Text style = {{
+        fontFamily: "IBMPlexMono-Medium",
+        color: "black",
+        fontSize: 16,
+        marginTop: '15%',
+        marginHorizontal: '5%',
+      }}>{fileData}</Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "flex-end",
+          marginHorizontal: "5%",
+          marginBottom: "2%",
+        }}
+      >
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
+            <TouchableOpacity onPress={handleStopButton}>
+              <Image
+                source={require("../assets/images/stopButton.png")}
+                style={{ width: 70, height: 70 }}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
+            <Image
+              source={require("../assets/images/blob_1.gif")}
+              style={{ width: 110, height: 110 }}
+              resizeMode="contain"
+            />
+            <Text
+              style={{
+                fontFamily: "IBMPlexMono-Regular",
+                position: "absolute",
+                top: "37%",
+                left: "37%",
+                color: "white",
+                fontSize: 16,
+              }}
+            >
+              {Math.floor(progress / 60)}:{progress % 60 < 10 ? "0" : ""}
+              {Math.floor(progress % 60)}
+            </Text>
+          </View>
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
+            <Image
+              source={require("../assets/images/stopButton.png")}
+              style={{ width: 70, height: 70 }}
+              resizeMode="contain"
+            />
+          </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
-
