@@ -4,23 +4,26 @@ const { SpeechClient } = require("@google-cloud/speech");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
+const { Configuration, OpenAIApi } = require("openai");
+const cors = require('cors');
 
-var app = express();
-var cors  =require('cors');
-app.use(cors());
+const app = express();
 const port = process.env.PORT || 3000;
-
 const upload = multer({ dest: "uploads/" });
 const speechClient = new SpeechClient();
+const {API_KEY} = require("./config.js")
+const {OpenAI} = require("openai")
+const openai = new OpenAI({ apiKey: API_KEY });
 
+
+app.use(cors());
 app.use(express.json());
 
-const transcriptionFilePath = path.join(__dirname,'./transcriptionFile(s)','transcription.txt')
+const transcriptionFilePath = path.join(__dirname, './transcriptionFile(s)', 'transcription.txt');
 
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   try {
     const filePath = path.join(__dirname, req.file.path);
-
     const audio = {
       content: fs.readFileSync(filePath).toString("base64"),
     };
@@ -45,50 +48,54 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
       .map((result) => result.alternatives[0].transcript)
       .join("\n");
     fs.appendFileSync(transcriptionFilePath, transcription + "\n");
-    // Delete the file after processing
     fs.unlinkSync(filePath);
 
     res.json({ transcription: transcription });
   } catch (error) {
     console.error("Error during transcription:", error);
     res.status(500).send("Error during transcription");
-
-
   }
 });
 
-app.post("/resetTranscriptionFile", (req,res) => {
+app.post("/resetTranscriptionFile", (req, res) => {
   try {
     fs.writeFileSync(transcriptionFilePath, "");
     res.send("Transcription file reset successfully");
-  }catch (error) {
+  } catch (error) {
     console.error("Error resetting transcription file:", error);
     res.status(500).send("Error resetting transcription file.");
-
-    
   }
-})
+});
 
-app.get('/file' , (req,res) => {
+app.get('/file', (req, res) => {
   res.sendFile(transcriptionFilePath, (err) => {
     if (err) {
       console.error("Error sending file:", err);
       res.status(err.status).end();
-    } else{
-      console.log("File sent successfully.")
+    } else {
+      console.log("File sent successfully.");
     }
   });
-})
+});
+
+app.post("/chat", async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) {
+      return res.status(400).send("Message content is missing");
+    }
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ "role": "user", "content": message }],
+    });
+    const chatResponse = response.choices[0].message.content;
+    res.json({ response: chatResponse });
+  } catch (error) {
+    console.error("Error during chat:", error);
+    res.status(500).send("Error during chat");
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
-
-
-// fs.readFile(filePath, 'utf8', (err, data) => {
-//   if (err) {
-//     console.error('Error reading the file:', err);
-//     return;
-//   }
-// })

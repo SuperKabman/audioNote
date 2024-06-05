@@ -22,6 +22,7 @@ import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
+
 // let recording = new Audio.Recording();
 
 const openai = new OpenAI({
