@@ -11,9 +11,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const upload = multer({ dest: "uploads/" });
 const speechClient = new SpeechClient();
-const {API_KEY} = require("./config.js")
-const {OpenAI} = require("openai")
-const openai = new OpenAI({ apiKey: API_KEY });
+
 
 
 app.use(cors());
@@ -78,23 +76,7 @@ app.get('/file', (req, res) => {
   });
 });
 
-app.post("/chat", async (req, res) => {
-  try {
-    const { message } = req.body;
-    if (!message) {
-      return res.status(400).send("Message content is missing");
-    }
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ "role": "user", "content": message }],
-    });
-    const chatResponse = response.choices[0].message.content;
-    res.json({ response: chatResponse });
-  } catch (error) {
-    console.error("Error during chat:", error);
-    res.status(500).send("Error during chat");
-  }
-});
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
