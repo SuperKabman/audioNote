@@ -9,17 +9,14 @@ import {
   Platform,
   Image,
 } from "react-native";
-import Slider from "@react-native-community/slider";
 import * as FileSystem from "expo-file-system";
-import * as Permissions from "expo-permissions";
 import * as Sharing from "expo-sharing";
 import { Audio, ResizeMode } from "expo-av";
 import axios from "axios";
-import { NativeModules } from "react-native";
 
 import OpenAI from "openai";
 import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as MediaLibrary from "expo-media-library";
 
 
 
@@ -47,17 +44,14 @@ export default function App() {
   }, []);
 
   const getPermissions = async () => {
-    const { status: micStatus } = await Permissions.askAsync(
-      Permissions.AUDIO_RECORDING
-    );
-    const { status: storageStatus } = await Permissions.askAsync(
-      Permissions.MEDIA_LIBRARY
-    );
-    if (micStatus !== "granted" || storageStatus !== "granted") {
+    const { status: micStatus } = await Audio.requestPermissionsAsync();
+    const { status: storageStatus } = await MediaLibrary.requestPermissionsAsync();
+    
+    if (micStatus !== 'granted' || storageStatus !== 'granted') {
       Alert.alert(
-        "Permissions Denied",
-        "This app requires microphone and storage permissions to function correctly.",
-        [{ text: "OK" }]
+        'Permissions Denied',
+        'This app requires microphone and storage permissions to function correctly.',
+        [{ text: 'OK' }]
       );
     }
   };
@@ -246,32 +240,27 @@ export default function App() {
       : undefined;
   }, [recording, sound]);
 
-  //TODO: FIX THIS FUNCTION IT CURRENTLY ONLY WORKS ONCE
   useEffect(() => {
-    const startRecordingIfNotAlreadyStarted = async () => {
-      const recordingStarted = await AsyncStorage.getItem('recordingStarted');
-      if (!recordingStarted) {
-        await startRecording();
-        await AsyncStorage.setItem('recordingStarted', 'true');
-      }
+    const initializeRecording = async () => {
+      // startRecording();
     };
-  
-    startRecordingIfNotAlreadyStarted();
+
+    initializeRecording();
   }, []);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'flex-end', marginHorizontal: '5%' }}>
+    <View style={{ flex: 1, justifyContent: 'flex-end', marginHorizontal: '5%', marginBottom: "2%" }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <TouchableOpacity onPress={stopRecording}>
-            <Image source={require('../assets/images/stopButton.png')} style={{ width: '100%', height: '100%' }} resizeMode='contain' />
+            <Image source={require('../assets/images/stopButton.png')} style={{ width: 70, height: 70 }} resizeMode='contain' />
           </TouchableOpacity>
         </View>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Image source={require('../assets/images/blob_1.gif')} style={{ width: '100%', height: '100%' }} resizeMode='contain' />
+          <Image source={require('../assets/images/blob_1.gif')} style={{ width: 110, height: 110 }} resizeMode='contain' />
         </View>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Image source={require('../assets/images/stopButton.png')} style={{ width: '100%', height: '100%' }} resizeMode='contain' />
+          <Image source={require('../assets/images/stopButton.png')} style={{ width: 70, height: 70 }} resizeMode='contain' />
         </View>
       </View>
     </View>
