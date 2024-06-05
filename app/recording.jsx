@@ -242,7 +242,7 @@ export default function App() {
 
   useEffect(() => {
     const initializeRecording = async () => {
-      // startRecording();
+      startRecording();
     };
 
     initializeRecording();
@@ -258,6 +258,7 @@ export default function App() {
         </View>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Image source={require('../assets/images/blob_1.gif')} style={{ width: 110, height: 110 }} resizeMode='contain' />
+          <Text style={{ fontFamily: 'IBMPlexMono-Regular', position: 'absolute', top: '37%', left: '37%', color: 'white', fontSize: 16 }}>{Math.floor(progress / 60)}:{progress % 60 < 10 ? '0' : ''}{Math.floor(progress % 60)}</Text>
         </View>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Image source={require('../assets/images/stopButton.png')} style={{ width: 70, height: 70 }} resizeMode='contain' />
