@@ -1,4 +1,4 @@
-import { View, Text, Alert, TouchableOpacity, Image } from "react-native";
+import { View, Text, Alert, TouchableOpacity, Image, SafeAreaView } from "react-native";
 import { useNavigation } from "expo-router";
 import React from "react";
 import "nativewind";
@@ -10,25 +10,26 @@ const Home = () => {
 
   const handlePress = () => {
     navigation.navigate('recording');
-  
+
   }
   const handleProfile = () => {
     navigation.navigate('profile');
   }
 
   return (
-    <View>
+    <SafeAreaView style = {{flex : 1}}>
       <TouchableOpacity
         onPress={handlePress}
         style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Image source={require('@/assets/images/blob_1.gif')} style = {{width: '70%', height: '70%',top:'50%'}} />
-        <Text style={{position:'absolute', top:'94%', left:'37%',color: 'white', fontSize: 36 }}>Record</Text>
+
+        <Image source={require('@/assets/images/blob_1.gif')} style = {{width: '60%', height: '60%',top:'25%', margin: "5%"}} resizeMode="contain" />
+        <Text style={{position:'absolute', top:'70%', left:'37%',color: 'white', fontSize: 36 }}>Record</Text>
       </TouchableOpacity>
       <TouchableOpacity
         onPress={handleProfile}>
-        <Image source={icons.profile} style = {{top:'-550%', left:'80%'}} />
+        <Image source={icons.profile} style = {{top:'-750%', left:'80%'}} />
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 

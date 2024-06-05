@@ -5,7 +5,7 @@ import OpenAI from 'openai'
 import { Models } from 'openai/resources';
 import { Alert } from 'react-native';
 import {API_KEY} from './config'
-
+import { icons } from '@/constants/icons';
 
 
 const openai = new OpenAI({apiKey:API_KEY});
@@ -35,7 +35,7 @@ const Chat = () => {
     setMessages([...messages, { sender: 'user', text: userMessage }]);
     setInput('');
 
-    try {
+    try { 
       const response = await responseGeneration(userMessage);
       botMessage = response.choices[0].message.content;
       setMessages((prevMessages) => [...prevMessages, { sender: 'bot', text: botMessage }]);

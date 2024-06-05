@@ -7,4 +7,7 @@ export const icons = {
     stop: require("../assets/images/stopButton.png"),
     blob: require("../assets/images/blob_1.gif"),
     profile: require("../assets/images/profileIcon.png"),
+    chatCanvas: require("../assets/images/chatCanvas.png"),
+    chatBar: require("../assets/images/chatBar.png"),
+    back: require("../assets/images/backButton.png"),
 };
