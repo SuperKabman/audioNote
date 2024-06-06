@@ -103,6 +103,11 @@ export default function App() {
       const { recording } = await Audio.Recording.createAsync(recordingOptions);
       console.log("Recording started");
       recordingVar = recording;
+
+      if (uri !== "") {
+        cycleTranscription();
+      }
+
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -139,6 +144,29 @@ export default function App() {
     } catch (err) {
       console.error("Failed to stop recording", err);
     }
+  };
+
+  const cycleTranscription = async () => {
+    console.log("Transcribing audio...");
+      const formData = new FormData();
+      formData.append("audio", {
+        uri,
+        type: Platform.OS === "ios" ? "audio/x-caf" : "audio/mp4",
+        name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
+      });
+
+      const response = await axios.post(
+        `http://${IP_ADDRESS}:3000/transcribe`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      const transcription = response.data.transcription;
+      console.log("Transcription:", transcription);
+      fetchTranscription();
   };
 
   async function playRecording() {
@@ -272,7 +300,7 @@ export default function App() {
       if (isListening && !isPaused) {
         await handleRecordingCycle();
       }
-    }, 15000);
+    }, 7000);
 
     return () => clearInterval(interval);
   }, [isListening, isPaused]);
