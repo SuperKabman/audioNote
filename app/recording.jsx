@@ -24,7 +24,7 @@ const openai = new OpenAI({
 });
 
 export default function App() {
-  const [recordingVar, setRecordingVar] = useState(null);
+  // const [recordingVar, setRecordingVar] = useState(null);
   const [sound, setSound] = useState(null);
   const [gainValue, setGainValue] = useState(1);
   const [uri, setUri] = useState("");
@@ -38,6 +38,8 @@ export default function App() {
     getPermissions();
     fetchTranscription();
   }, []);
+
+  let recordingVar = null;
 
   const getPermissions = async () => {
     const { status: micStatus } = await Audio.requestPermissionsAsync();
@@ -67,11 +69,9 @@ export default function App() {
   };
 
   async function startRecording() {
-    if (recordingVar) {
-      console.log("stopping previous recording with the recording variable as ", recordingVar);
+    if (recordingVar != null) {
       await stopRecording();
     }
-
     try {
       await Audio.requestPermissionsAsync();
       await Audio.setAudioModeAsync({
@@ -100,52 +100,43 @@ export default function App() {
         },
       };
 
-      const { recording } = await Audio.Recording.createAsync(
-        recordingOptions,
-      );
+      const { recording } = await Audio.Recording.createAsync(recordingOptions);
       console.log("Recording started");
-      recording.setOnRecordingStatusUpdate((status) => {
-        setRecordingVar(recording);
-      });
+      recordingVar = recording;
     } catch (err) {
       console.error("Failed to start recording", err);
     }
   }
 
   const stopRecording = async () => {
-    console.log("entered the stop recording function");
-    console.log(recordingVar);
     try {
-        await recordingVar.stopAndUnloadAsync();
-        const uri = recordingVar.getURI();
-        console.log("Recording stopped and stored at", uri);
-        setUri(uri);
-        setRecordingVar(null);
-        console.log("Transcribing audio...");
-        const formData = new FormData();
-        formData.append("audio", {
-          uri,
-          type: Platform.OS === "ios" ? "audio/x-caf" : "audio/mp4",
-          name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
-        });
+      console.log("Stopping recording...");
+      await recordingVar.stopAndUnloadAsync();
+      const uri = recordingVar.getURI();
+      console.log("Recording stopped and stored");
+      setUri(uri);
+      recordingVar = null;
+      console.log("Transcribing audio...");
+      const formData = new FormData();
+      formData.append("audio", {
+        uri,
+        type: Platform.OS === "ios" ? "audio/x-caf" : "audio/mp4",
+        name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
+      });
 
-        const response = await axios.post(
-          `http://${IP_ADDRESS}:3000/transcribe`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        const transcription = response.data.transcription;
-        console.log("Transcription:", transcription);
-        fetchTranscription();
-        if (isListening) {
-          startRecording();
+      const response = await axios.post(
+        `http://${IP_ADDRESS}:3000/transcribe`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         }
-      }
-     catch (err) {
+      );
+      const transcription = response.data.transcription;
+      console.log("Transcription:", transcription);
+      fetchTranscription();
+    } catch (err) {
       console.error("Failed to stop recording", err);
     }
   };
@@ -189,7 +180,6 @@ export default function App() {
   const handleResetFile = async () => {
     try {
       await axios.post(`http://${IP_ADDRESS}:3000/resetTranscriptionFile`);
-      alert("Previous recording deleted.");
       setFileData("");
       setGeneratedResponse("");
     } catch (error) {
@@ -230,15 +220,14 @@ export default function App() {
       });
     }
     return sound
-    ? async () => {
-        if (!recordingVar) {
-          console.log("Unloading sound...");
-          await sound.unloadAsync();
+      ? async () => {
+          if (!recordingVar) {
+            console.log("Unloading sound...");
+            await sound.unloadAsync();
+          }
         }
-      }
-    : undefined;
-}, [recordingVar, sound]);
-
+      : undefined;
+  }, [recordingVar, sound]);
 
   // use effect to start the recording as soon as the page loads
   useEffect(() => {
@@ -258,56 +247,55 @@ export default function App() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      if (!isPaused) {
+      if (!isPaused && isListening) {
         setProgress((prevProgress) => prevProgress + 1);
       }
     }, 1000);
     setIntervalId(id);
     return () => clearInterval(id);
   }, [isPaused]);
-  
+
   const pauseTimer = () => {
     setIsPaused(true);
   };
-  
+
   const resumeTimer = () => {
     setIsPaused(false);
   };
 
   const handleRecordingCycle = async () => {
-    
-      console.log("stopping previous recording");
-      await startRecording();
-  
-    // await startRecording();
+    await startRecording();
   };
-  
+
   useEffect(() => {
     const interval = setInterval(async () => {
       if (isListening && !isPaused) {
         await handleRecordingCycle();
       }
-    }, 10000);
-  
+    }, 15000);
+
     return () => clearInterval(interval);
   }, [isListening, isPaused]);
 
   const handleStopButton = async () => {
     setIsListening(false);
-    if (recordingVar) {
-      await stopRecording();
-    }
+    await stopRecording();
+    handleResetFile();
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Text style = {{
-        fontFamily: "IBMPlexMono-Medium",
-        color: "black",
-        fontSize: 16,
-        marginTop: '15%',
-        marginHorizontal: '5%',
-      }}>{fileData}</Text>
+      <Text
+        style={{
+          fontFamily: "IBMPlexMono-Medium",
+          color: "black",
+          fontSize: 16,
+          marginTop: "15%",
+          marginHorizontal: "5%",
+        }}
+      >
+        {fileData}
+      </Text>
       <View
         style={{
           flex: 1,
