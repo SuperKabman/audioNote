@@ -13,6 +13,7 @@ import axios from "axios";
 import OpenAI from "openai";
 import { Redirect } from "expo-router";
 import { API_KEY } from "@/keys/config";
+import { KeyboardAvoidingView, Platform } from "react-native";
 
 const openai = new OpenAI({ apiKey: API_KEY });
 
@@ -85,7 +86,8 @@ const Chat = () => {
           </Text>
         ))}
       </ScrollView>
-      <View style={styles.inputContainer}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+       style={styles.inputContainer} >
         <Image
           source={require("../assets/images/chatBar.png")}
           style={styles.chatBar}
@@ -105,7 +107,7 @@ const Chat = () => {
             style={styles.sendButton}
           />
         </TouchableOpacity>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -160,7 +162,7 @@ const styles = StyleSheet.create({
     height: "65%",
     width: "98%",
     bottom: "33%",
-    left: "4%",
+    left: "2%",
   },
   input: {
     flex: 1,
@@ -171,7 +173,8 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     marginLeft: 10,
     marginRight: 10,
-    backgroundColor: "transparent",
+    backgroundColor: "white",
+    bottom: '3%',
   },
   sendButtonContainer: {
     padding: "5%",
@@ -180,6 +183,7 @@ const styles = StyleSheet.create({
     height: 42,
     width: 42,
     left: "30%",
+    bottom:'28%',
   },
 });
 
