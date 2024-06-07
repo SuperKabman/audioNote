@@ -106,6 +106,7 @@ export default function App() {
   }
 
   const stopRecording = async () => {
+   
     try {
       console.log("Stopping recording...");
       await recordingVar.stopAndUnloadAsync();
@@ -230,6 +231,7 @@ export default function App() {
   useEffect(() => {
     const initializeRecording = async () => {
       console.log("Initializing recording...");
+      handleResetFile();
       startRecording();
     };
 
@@ -264,13 +266,13 @@ export default function App() {
       console.log("Resuming recording...");
       await recordingVar.startAsync();
       setIsListening(true);
+      
     }
   };
 
   const handleStopButton = async () => {
     setIsListening(false);
     await stopRecording();
-    handleResetFile();
   };
 
   return (

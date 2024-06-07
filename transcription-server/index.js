@@ -83,6 +83,7 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 app.post("/resetTranscriptionFile", (req, res) => {
   try {
     fs.writeFileSync(transcriptionFilePath, "");
+    fs.writeFileSync(wordTimeMappingFilePath, "");
     res.send("Transcription file reset successfully");
   } catch (error) {
     console.error("Error resetting transcription file:", error);
