@@ -24,7 +24,7 @@ const openai = new OpenAI({
 });
 
 export default function App() {
-  // const [recordingVar, setRecordingVar] = useState(null);
+  const [recordingVar, setRecordingVar] = useState(null);
   const [sound, setSound] = useState(null);
   const [gainValue, setGainValue] = useState(1);
   const [uri, setUri] = useState("");
@@ -39,7 +39,7 @@ export default function App() {
     fetchTranscription();
   }, []);
 
-  let recordingVar = null;
+  // let recordingVar = null;
 
   const getPermissions = async () => {
     const { status: micStatus } = await Audio.requestPermissionsAsync();
@@ -69,9 +69,6 @@ export default function App() {
   };
 
   async function startRecording() {
-    if (recordingVar != null) {
-      await stopRecording();
-    }
     try {
       await Audio.requestPermissionsAsync();
       await Audio.setAudioModeAsync({
@@ -102,12 +99,7 @@ export default function App() {
 
       const { recording } = await Audio.Recording.createAsync(recordingOptions);
       console.log("Recording started");
-      recordingVar = recording;
-
-      if (uri !== "") {
-        cycleTranscription();
-      }
-
+      setRecordingVar(recording);
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -120,7 +112,7 @@ export default function App() {
       const uri = recordingVar.getURI();
       console.log("Recording stopped and stored");
       setUri(uri);
-      recordingVar = null;
+      setRecordingVar(null);
       console.log("Transcribing audio...");
       const formData = new FormData();
       formData.append("audio", {
@@ -144,29 +136,6 @@ export default function App() {
     } catch (err) {
       console.error("Failed to stop recording", err);
     }
-  };
-
-  const cycleTranscription = async () => {
-    console.log("Transcribing audio...");
-      const formData = new FormData();
-      formData.append("audio", {
-        uri,
-        type: Platform.OS === "ios" ? "audio/x-caf" : "audio/mp4",
-        name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
-      });
-
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/transcribe`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      const transcription = response.data.transcription;
-      console.log("Transcription:", transcription);
-      fetchTranscription();
   };
 
   async function playRecording() {
@@ -269,41 +238,34 @@ export default function App() {
 
   // use effect for the timer
   const [progress, setProgress] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
   const [isListening, setIsListening] = useState(true); // for when the app is recording
 
   useEffect(() => {
     const id = setInterval(() => {
-      if (!isPaused && isListening) {
+      if (isListening) {
         setProgress((prevProgress) => prevProgress + 1);
       }
     }, 1000);
     setIntervalId(id);
     return () => clearInterval(id);
-  }, [isPaused]);
+  }, [isListening]);
 
-  const pauseTimer = () => {
-    setIsPaused(true);
+  const pauseRecording = async () => {
+    if (recordingVar) {
+      console.log("Pausing recording...");
+      await recordingVar.pauseAsync();
+      setIsListening(false);
+    }
   };
 
-  const resumeTimer = () => {
-    setIsPaused(false);
+  const resumeRecording = async () => {
+    if (recordingVar) {
+      console.log("Resuming recording...");
+      await recordingVar.startAsync();
+      setIsListening(true);
+    }
   };
-
-  const handleRecordingCycle = async () => {
-    await startRecording();
-  };
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      if (isListening && !isPaused) {
-        await handleRecordingCycle();
-      }
-    }, 7000);
-
-    return () => clearInterval(interval);
-  }, [isListening, isPaused]);
 
   const handleStopButton = async () => {
     setIsListening(false);
@@ -369,11 +331,19 @@ export default function App() {
           <View
             style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
           >
-            <Image
-              source={require("../assets/images/stopButton.png")}
-              style={{ width: 70, height: 70 }}
-              resizeMode="contain"
-            />
+            <TouchableOpacity
+              onPress={isListening ? pauseRecording : resumeRecording}
+            >
+              <Image
+                source={
+                  isListening
+                    ? require("../assets/images/pauseButton.png")
+                    : require("../assets/images/playButton.png")
+                }
+                style={{ width: 70, height: 70 }}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
