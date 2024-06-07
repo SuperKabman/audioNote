@@ -32,24 +32,34 @@ const responseGeneration = async (userMessage) => {
     );
   }
 };
-
+let context = "";
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [shouldRedirect, setShouldRedirect] = useState(false);
-
+  
+  
   const sendMessage = async () => {
     const userMessage = input;
+    context = context+'\n'+userMessage;
     setMessages([...messages, { sender: "user", text: userMessage }]);
     setInput("");
-
+  
     try {
-      const response = await responseGeneration(userMessage);
-      const botMessage = response.choices[0].message.content;
+      
+      const response = await responseGeneration('context from before: \n'+context+'\n\n\n'+userMessage);
+      
+const botMessage = response.choices[0].message.content;
       setMessages((prevMessages) => [
         ...prevMessages,
         { sender: "bot", text: botMessage },
+        
       ]);
+      
+    
+      
+   
+
     } catch (error) {
       console.error("Error during chat:", error);
     }
@@ -60,6 +70,7 @@ const Chat = () => {
   };
 
   if (shouldRedirect) {
+    context = "";
     return <Redirect href="/home" />;
   }
 
