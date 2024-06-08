@@ -31,15 +31,17 @@ if (redirect) {
 }
   
   return (
-    <KeyboardAvoidingView>
-    <View style = {styles.container}>
+    <KeyboardAvoidingView style = {styles.container}>
+    <View >
+    <Text style = {{color: 'white', fontSize: 50, top:50, left:80,fontFamily: "IBMPlexMono-Medium"}}>Sign-Up</Text>
+
       <View style = {styles.inputContainer}>
       <FontAwesome 
       name = "user" 
       size = {24} 
       color = "#9A9A9A" 
       style = {styles.inputIcon} />
-      <TextInput style = {styles.textInput}placeholder='Email/Username'
+      <TextInput style = {styles.textInput}placeholder='Enter an Email' placeholderTextColor={'#282828'}
       value = {email} onChangeText={text => setEmail(text)}/>
       </View>
       <View style = {styles.inputContainer}>
@@ -48,7 +50,7 @@ if (redirect) {
       size = {24} 
       color = "#9A9A9A" 
       style = {styles.inputIcon} />
-      <TextInput style = {styles.textInput}placeholder='Password' secureTextEntry
+      <TextInput style = {styles.textInput}placeholder='Choose a Password' secureTextEntry placeholderTextColor={'#282828'}
       value = {password} onChangeText={text => setPassword(text)}/>
       </View>
       <View style = {styles.buttonContainer}>
@@ -72,7 +74,8 @@ export default Signup;
 
 const styles = StyleSheet.create({
   container: {
-      backgroundColor: "#F5F5F5",
+    
+      backgroundColor: '#282828',
       flex: 1,
       alignItems: 'center',
   },
@@ -84,12 +87,17 @@ const styles = StyleSheet.create({
       elevation: 10,
       marginVertical: 20,
       marginTop: 25,
-      top: 150,
+      top: 130,
       height:45,
       alignItems: 'center',
+      borderRadius: 15,
+      borderColor: '#484848',
+      borderWidth: 2,
+      width: '70%',
   },
   inputIcon: {
       marginLeft: 17,
+      color: 'black',
   },
   textInput: {
       flex: 1,
@@ -99,15 +107,17 @@ const styles = StyleSheet.create({
       width:'60%',
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: '60%',
+      marginTop: '50%',
       height:50,
+      left: 100,
+      
   },
   button: {
-      backgroundColor: '#FF6347',
+      backgroundColor: '#484848',
       fontSize: 14,
-      width:'100%',
+      width:160,
       paddingHorizontal: 15,
-      borderRadius: 10,
+      borderRadius: 15,
       height:'100%',
       padding: 15,
       justifyContent: 'center',
