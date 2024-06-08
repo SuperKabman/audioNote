@@ -7,10 +7,18 @@ import { auth } from '../firebase'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { Redirect, useNavigation } from 'expo-router'
 
+
+
 const Signup = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [redirect, setRedirect] = useState(false)
+  const navigation = useNavigation()
+
+  useEffect(() => {
+    navigation.setOptions({ headerShown: false 
+  });
+  } ,[])
 
   const handleSignUp = () => {
     
@@ -33,7 +41,7 @@ if (redirect) {
   return (
     <KeyboardAvoidingView style = {styles.container}>
     <View >
-    <Text style = {{color: 'white', fontSize: 50, top:50, left:80,fontFamily: "IBMPlexMono-Medium"}}>Sign-Up</Text>
+    <Text style = {{color: 'white', fontSize: 50, top:130, left:80,fontFamily: "IBMPlexMono-Medium"}}>Sign-Up</Text>
 
       <View style = {styles.inputContainer}>
       <FontAwesome 
@@ -57,12 +65,12 @@ if (redirect) {
         <TouchableOpacity
          onPress={handleSignUp}
          style = {[styles.button, styles.buttonOutline]}>
-            <Text>Sign Up </Text>
+            <Text style = {{fontFamily : 'IBMPlexMono-Medium', fontSize:12}}>Sign Up </Text>
         </TouchableOpacity>
         <TouchableOpacity
          onPress={redirectLogin}
          style = {[styles.button, styles.buttonOutline]}>
-            <Text>Back To Login</Text>
+            <Text style = {{fontFamily : 'IBMPlexMono-Medium', fontSize:12}}>Back To Login</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -87,7 +95,7 @@ const styles = StyleSheet.create({
       elevation: 10,
       marginVertical: 20,
       marginTop: 25,
-      top: 130,
+      top: 180,
       height:45,
       alignItems: 'center',
       borderRadius: 15,
@@ -102,12 +110,13 @@ const styles = StyleSheet.create({
   textInput: {
       flex: 1,
       marginLeft: 10,
+      fontFamily: "IBMPlexMono-Medium",
   },
   buttonContainer: {
       width:'60%',
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: '50%',
+      marginTop: '70%',
       height:50,
       left: 100,
       

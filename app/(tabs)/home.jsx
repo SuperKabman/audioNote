@@ -23,7 +23,7 @@ const Home = () => {
   // ...
 
 return (
-  <SafeAreaView style={{ flex: 1 }}>
+  <SafeAreaView style={{ flex: 1 , backgroundColor:'#DADADA'}}>
     <SafeAreaView style={{ flex: 1 }}>
       <TouchableOpacity
         onPress={handlePress}

@@ -17,6 +17,11 @@ const Login = () => {
   const [signUpRedirect, setSignUpRedirect] = useState(false)
 
   useEffect(() => {
+    navigation.setOptions({ headerShown: false 
+  });
+  } ,[])
+
+  useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
         if (user) {
             redirectHome();
@@ -51,7 +56,7 @@ const Login = () => {
   return (
     <KeyboardAvoidingView style = {styles.container}>
     <View>
-      <Text style = {{color: 'white', fontSize: 50, top:50, left:105,fontFamily: "IBMPlexMono-Medium"}}>Login</Text>
+      <Text style = {{color: 'white', fontSize: 50, top:130, left:105,fontFamily: "IBMPlexMono-Medium"}}>Login</Text>
       <View style = {styles.inputContainer}>
       <FontAwesome 
       name = "user" 
@@ -74,12 +79,12 @@ const Login = () => {
         <TouchableOpacity
          onPress={handleLogin}
          style = {[styles.button, styles.buttonOutline]}>
-            <Text>Login</Text>
+            <Text style = {{fontFamily : 'IBMPlexMono-Medium', fontSize:12}}>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity
          onPress={redirectSignup}
          style = {[styles.button, styles.buttonOutline]}>
-            <Text>New to Audionote?  </Text>
+            <Text style={{left:7,fontFamily : 'IBMPlexMono-Medium', fontSize:12}}>New to Audionote?  </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -104,7 +109,7 @@ const styles = StyleSheet.create({
         elevation: 10,
         marginVertical: 20,
         marginTop: 25,
-        top: 130,
+        top: 180,
         height:45,
         alignItems: 'center',
         borderRadius: 15,
@@ -119,12 +124,13 @@ const styles = StyleSheet.create({
     textInput: {
         flex: 1,
         marginLeft: 10,
+        fontFamily: "IBMPlexMono-Medium",
     },
     buttonContainer: {
         width:'60%',
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: '50%',
+        marginTop: '70%',
         height:50,
         left: 100,
         
@@ -133,7 +139,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#484848',
         fontSize: 14,
         width:160,
-        paddingHorizontal: 15,
+        paddingHorizontal: 12,
         borderRadius: 15,
         height:'100%',
         padding: 15,
@@ -150,7 +156,7 @@ const styles = StyleSheet.create({
     buttonText: {
         color: '#FFFFFF',
         fontWeight: '700',
-        fontSize: 16,
+        fontSize: 10,
     },
     
 })
