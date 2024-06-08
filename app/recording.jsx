@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 
 import {
   StyleSheet,
@@ -18,6 +18,7 @@ import axios from "axios";
 import OpenAI from "openai";
 import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
 import * as MediaLibrary from "expo-media-library";
+import Waveform from "../components/waveform";
 
 const openai = new OpenAI({
   apiKey: API_KEY,
@@ -33,6 +34,8 @@ export default function App() {
   const [fileData, setFileData] = useState("");
   const [userMessage, setUserMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
+  const [waveform, setWaveform] = useState([]);
+
 
   useEffect(() => {
     getPermissions();
@@ -100,6 +103,9 @@ export default function App() {
       const { recording } = await Audio.Recording.createAsync(recordingOptions);
       console.log("Recording started");
       setRecordingVar(recording);
+
+      // setInterval(updateWaveform, 500);
+
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -204,6 +210,34 @@ export default function App() {
     }
   };
 
+  const updateWaveform = async () => {
+    console.log("update waveform called");
+    if (recordingVar) {
+      const status = await recordingVar.getStatusAsync();
+      if (status.isRecording) {
+        const uri = recordingVar.getURI();
+        const info = await FileSystem.getInfoAsync(uri, { size: true });
+        const fileData = await FileSystem.readAsStringAsync(uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const waveform = generateMockWaveform(40);
+        console.log("waveform data: ", waveform);
+        setWaveform(waveform);
+      }
+    }
+  };
+
+  const generateMockWaveform = (length) => {
+    const points = [];
+    for (let i = 0; i < length; i++) {
+      points.push(Math.random() * 100);
+    }
+    return points;
+  };
+
+
+
+
   // use effect for recording parameteres
   useEffect(() => {
     if (recordingVar) {
@@ -247,6 +281,7 @@ export default function App() {
     const id = setInterval(() => {
       if (isListening) {
         setProgress((prevProgress) => prevProgress + 1);
+        updateWaveform();
       }
     }, 1000);
     setIntervalId(id);
@@ -277,6 +312,9 @@ export default function App() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        <Waveform waveform={waveform} />
+      </View>
       <Text
         style={{
           fontFamily: "IBMPlexMono-Medium",
