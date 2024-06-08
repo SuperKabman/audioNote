@@ -36,19 +36,11 @@ const Login = () => {
   }
 
   if (signUpRedirect) {
-    return <Redirect href='/Signup' />
+    return <Redirect href='auth/Signup' />
   }
 
 
-  const handleSignUp = () => {
-    
-        createUserWithEmailAndPassword(auth, email, password)
-        .then(userCredenditals => {
-            const user = userCredenditals.user;
-            console.log('Registered with:', user.email);
-        })
-        .catch(error => alert(error.message))
-  }
+  
 
   const handleLogin = () => {
         signInWithEmailAndPassword(auth, email, password)
@@ -89,7 +81,7 @@ const Login = () => {
         <TouchableOpacity
          onPress={redirectSignup}
          style = {[styles.button, styles.buttonOutline]}>
-            <Text>Sign Up </Text>
+            <Text>New to Audionote?  </Text>
         </TouchableOpacity>
       </View>
     </View>
