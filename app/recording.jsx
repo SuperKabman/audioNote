@@ -36,7 +36,6 @@ export default function App() {
   const [chatHistory, setChatHistory] = useState([]);
   const [waveform, setWaveform] = useState([]);
 
-
   useEffect(() => {
     getPermissions();
     fetchTranscription();
@@ -105,14 +104,12 @@ export default function App() {
       setRecordingVar(recording);
 
       // setInterval(updateWaveform, 500);
-
     } catch (err) {
       console.error("Failed to start recording", err);
     }
   }
 
   const stopRecording = async () => {
-   
     try {
       console.log("Stopping recording...");
       await recordingVar.stopAndUnloadAsync();
@@ -211,20 +208,10 @@ export default function App() {
   };
 
   const updateWaveform = async () => {
-    console.log("update waveform called");
-    if (recordingVar) {
-      const status = await recordingVar.getStatusAsync();
-      if (status.isRecording) {
-        const uri = recordingVar.getURI();
-        const info = await FileSystem.getInfoAsync(uri, { size: true });
-        const fileData = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        const waveform = generateMockWaveform(40);
-        console.log("waveform data: ", waveform);
-        setWaveform(waveform);
-      }
-    }
+    // console.log("update waveform called");
+    const waveform = generateMockWaveform(40);
+    // console.log("waveform data: ", waveform);
+    setWaveform(waveform);
   };
 
   const generateMockWaveform = (length) => {
@@ -234,9 +221,6 @@ export default function App() {
     }
     return points;
   };
-
-
-
 
   // use effect for recording parameteres
   useEffect(() => {
@@ -280,10 +264,10 @@ export default function App() {
   useEffect(() => {
     const id = setInterval(() => {
       if (isListening) {
-        setProgress((prevProgress) => prevProgress + 1);
+        setProgress((prevProgress) => prevProgress + 0.5);
         updateWaveform();
       }
-    }, 1000);
+    }, 500);
     setIntervalId(id);
     return () => clearInterval(id);
   }, [isListening]);
@@ -301,7 +285,6 @@ export default function App() {
       console.log("Resuming recording...");
       await recordingVar.startAsync();
       setIsListening(true);
-      
     }
   };
 
