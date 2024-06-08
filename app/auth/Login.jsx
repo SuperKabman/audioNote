@@ -14,6 +14,7 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const navigation = useNavigation()
   const [redirect, setRedirect] = useState(false)
+  const [signUpRedirect, setSignUpRedirect] = useState(false)
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -30,6 +31,13 @@ const Login = () => {
   const redirectHome = () => {
     setRedirect(true);
   };
+  const redirectSignup = () => {
+    setSignUpRedirect(true);
+  }
+
+  if (signUpRedirect) {
+    return <Redirect href='/Signup' />
+  }
 
 
   const handleSignUp = () => {
@@ -79,9 +87,9 @@ const Login = () => {
             <Text>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity
-         onPress={handleSignUp}
+         onPress={redirectSignup}
          style = {[styles.button, styles.buttonOutline]}>
-            <Text>Register</Text>
+            <Text>Sign Up </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -136,7 +144,7 @@ const styles = StyleSheet.create({
     },
     buttonOutline: {
         backgroundColor: '#FFFFFF',
-        marginTop: 15,
+        marginTop: 70,
         borderWidth: 1,
         borderColor: '#808080',
         borderWidth: 2,
