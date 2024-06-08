@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from "react";
-
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -9,12 +8,12 @@ import {
   Platform,
   Image,
   SafeAreaView,
+  Animated,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { Audio, ResizeMode } from "expo-av";
+import { Audio } from "expo-av";
 import axios from "axios";
-
 import OpenAI from "openai";
 import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
 import * as MediaLibrary from "expo-media-library";
@@ -34,19 +33,16 @@ export default function App() {
   const [fileData, setFileData] = useState("");
   const [userMessage, setUserMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
-  const [waveform, setWaveform] = useState([]);
+  const [waveform, setWaveform] = useState(new Array(40).fill(0));
 
   useEffect(() => {
     getPermissions();
     fetchTranscription();
   }, []);
 
-  // let recordingVar = null;
-
   const getPermissions = async () => {
     const { status: micStatus } = await Audio.requestPermissionsAsync();
-    const { status: storageStatus } =
-      await MediaLibrary.requestPermissionsAsync();
+    const { status: storageStatus } = await MediaLibrary.requestPermissionsAsync();
 
     if (micStatus !== "granted" || storageStatus !== "granted") {
       Alert.alert(
@@ -102,8 +98,6 @@ export default function App() {
       const { recording } = await Audio.Recording.createAsync(recordingOptions);
       console.log("Recording started");
       setRecordingVar(recording);
-
-      // setInterval(updateWaveform, 500);
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -164,10 +158,7 @@ export default function App() {
       if (uri) {
         await Sharing.shareAsync(uri);
       } else {
-        Alert.alert(
-          "No Recording",
-          "There is no recording available to share."
-        );
+        Alert.alert("No Recording", "There is no recording available to share.");
       }
     } catch (err) {
       console.error("Failed to share recording", err);
@@ -208,10 +199,8 @@ export default function App() {
   };
 
   const updateWaveform = async () => {
-    // console.log("update waveform called");
-    const waveform = generateMockWaveform(40);
-    // console.log("waveform data: ", waveform);
-    setWaveform(waveform);
+    const newWaveform = generateMockWaveform(40);
+    setWaveform(newWaveform);
   };
 
   const generateMockWaveform = (length) => {
@@ -222,7 +211,6 @@ export default function App() {
     return points;
   };
 
-  // use effect for recording parameteres
   useEffect(() => {
     if (recordingVar) {
       Audio.setAudioModeAsync({
@@ -245,7 +233,6 @@ export default function App() {
       : undefined;
   }, [recordingVar, sound]);
 
-  // use effect to start the recording as soon as the page loads
   useEffect(() => {
     const initializeRecording = async () => {
       console.log("Initializing recording...");
@@ -256,10 +243,8 @@ export default function App() {
     initializeRecording();
   }, []);
 
-  // use effect for the timer
   const [progress, setProgress] = useState(0);
-  const [intervalId, setIntervalId] = useState(null);
-  const [isListening, setIsListening] = useState(true); // for when the app is recording
+  const [isListening, setIsListening] = useState(true);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -268,7 +253,6 @@ export default function App() {
         updateWaveform();
       }
     }, 500);
-    setIntervalId(id);
     return () => clearInterval(id);
   }, [isListening]);
 
@@ -318,9 +302,7 @@ export default function App() {
         }}
       >
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <View
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-          >
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
             <TouchableOpacity onPress={handleStopButton}>
               <Image
                 source={require("../assets/images/stopButton.png")}
@@ -329,9 +311,7 @@ export default function App() {
               />
             </TouchableOpacity>
           </View>
-          <View
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-          >
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
             <Image
               source={require("../assets/images/blob_1.gif")}
               style={{ width: 110, height: 110 }}
@@ -351,12 +331,8 @@ export default function App() {
               {Math.floor(progress % 60)}
             </Text>
           </View>
-          <View
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-          >
-            <TouchableOpacity
-              onPress={isListening ? pauseRecording : resumeRecording}
-            >
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <TouchableOpacity onPress={isListening ? pauseRecording : resumeRecording}>
               <Image
                 source={
                   isListening
