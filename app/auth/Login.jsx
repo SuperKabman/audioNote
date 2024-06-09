@@ -56,7 +56,7 @@ const Login = () => {
   return (
     <KeyboardAvoidingView style = {styles.container}>
     <View>
-      <Text style = {{color: 'white', fontSize: 50, top:130, left:105,fontFamily: "IBMPlexMono-Medium"}}>Login</Text>
+      <Text style = {{color: '#F2F2F2', fontSize: 50, top:130, left:105,fontFamily: "IBMPlexMono-Medium"}}>Login</Text>
       <View style = {styles.inputContainer}>
       <FontAwesome 
       name = "user" 
@@ -97,7 +97,7 @@ export default Login;
 const styles = StyleSheet.create({
     container: {
       
-        backgroundColor: '#282828',
+        backgroundColor: '#14140F',
         flex: 1,
         alignItems: 'center',
     },

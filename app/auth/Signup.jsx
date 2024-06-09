@@ -41,7 +41,7 @@ if (redirect) {
   return (
     <KeyboardAvoidingView style = {styles.container}>
     <View >
-    <Text style = {{color: 'white', fontSize: 50, top:130, left:80,fontFamily: "IBMPlexMono-Medium"}}>Sign-Up</Text>
+    <Text style = {{color: '#F2F2F2', fontSize: 50, top:130, left:80,fontFamily: "IBMPlexMono-Medium"}}>Sign-Up</Text>
 
       <View style = {styles.inputContainer}>
       <FontAwesome 
@@ -83,7 +83,7 @@ export default Signup;
 const styles = StyleSheet.create({
   container: {
     
-      backgroundColor: '#282828',
+      backgroundColor: '#232625',
       flex: 1,
       alignItems: 'center',
   },

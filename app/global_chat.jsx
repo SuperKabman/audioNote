@@ -47,7 +47,7 @@ const Chat = () => {
   
     try {
       
-      const response = await responseGeneration('context from before: \n'+context+'\n\n\n'+userMessage);
+      const response = await responseGeneration(context+'\n\n\n'+userMessage);
       
 const botMessage = response.choices[0].message.content;
       setMessages((prevMessages) => [
