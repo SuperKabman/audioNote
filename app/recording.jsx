@@ -37,6 +37,7 @@ export default function App() {
   const [waveform, setWaveform] = useState(new Array(40).fill(0));
   const [isRenameVisible, setIsRenameVisible] = useState(false);
   const [filename, setFilename] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     getPermissions();
@@ -45,7 +46,8 @@ export default function App() {
 
   const getPermissions = async () => {
     const { status: micStatus } = await Audio.requestPermissionsAsync();
-    const { status: storageStatus } = await MediaLibrary.requestPermissionsAsync();
+    const { status: storageStatus } =
+      await MediaLibrary.requestPermissionsAsync();
 
     if (micStatus !== "granted" || storageStatus !== "granted") {
       Alert.alert(
@@ -103,6 +105,7 @@ export default function App() {
       const { recording } = await Audio.Recording.createAsync(recordingOptions);
       console.log("Recording started");
       setRecordingVar(recording);
+      setIsRecording(true);
     } catch (err) {
       console.error("Failed to start recording", err);
     }
@@ -111,11 +114,10 @@ export default function App() {
   const ensureDirExists = async (dir) => {
     const dirInfo = await FileSystem.getInfoAsync(dir);
     if (!dirInfo.exists) {
-      console.log('Directory does not exist, creating...');
+      console.log("Directory does not exist, creating...");
       await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
     }
   };
-  
 
   const stopRecording = async () => {
     try {
@@ -124,24 +126,6 @@ export default function App() {
       const uri = recordingVar.getURI();
       console.log("Recording stopped and stored");
 
-      // setting the default file name
-      const folder_name = `recording_${new Date().getTime()}`;
-      // setFilename(autogen_name);
-
-      // renaming the file
-      // isRenameVisible(true);
-
-      // moving the file to the recordings directory
-      const recordingDir = `${FileSystem.documentDirectory}recordings/${folder_name}`;
-      await FileSystem.makeDirectoryAsync(recordingDir, { intermediates: true });
-      const fileURI = `${recordingDir}/voice_recording.m4a`;
-      await FileSystem.moveAsync({ from: uri, to: fileURI });
-      console.log("Recording saved to:", fileURI);
-      const fileInfo = await FileSystem.getInfoAsync(fileURI);
-      console.log("File info:", fileInfo);
-      setUri(fileURI);
-      setRecordingVar(null);
-      setIsRenameVisible(true);
       console.log("Transcribing audio...");
       const formData = new FormData();
       formData.append("audio", {
@@ -160,14 +144,55 @@ export default function App() {
         }
       );
       const transcription = response.data.transcription;
+      setFileData(transcription);
+      const wordTimeMapping = response.data.wordTimeMapping;
       console.log("Transcription:", transcription);
-      fetchTranscription();
 
+      // setting the default file name
+      const folder_name = `recording_${new Date().getTime()}`;
+
+      // creating the directory
+      const recordingDir = `${FileSystem.documentDirectory}recordings/${folder_name}`;
+      await FileSystem.makeDirectoryAsync(recordingDir, {
+        intermediates: true,
+      });
+
+      // saving the audio file in the directory
+      const fileURI = `${recordingDir}/voice_recording.m4a`;
+      await FileSystem.moveAsync({ from: uri, to: fileURI });
+      console.log("Recording saved to:", fileURI);
+      const fileInfo = await FileSystem.getInfoAsync(fileURI);
+      console.log("File info:", fileInfo);
+
+      // saving the transcription in a file
+      const transcriptionFile = `${recordingDir}/transcription.txt`;
+      await FileSystem.writeAsStringAsync(transcriptionFile, transcription);
+      console.log("Transcription saved to:", transcriptionFile);
+
+      // saving the metadata in a file
+      const metadataFile = `${recordingDir}/metadata.txt`;
+      const recordingLengthSeconds = recordingVar.getDurationMillis() / 1000;
+      const metadata = `Recording Date: ${new Date().toLocaleDateString()}\nRecording Length: ${recordingLengthSeconds} seconds`;
+      await FileSystem.writeAsStringAsync(metadataFile, metadata);
+      console.log("Metadata saved to:", metadataFile);
+
+      // saving the summary in a file
+
+      // saving the word-time-mapping
+      const wordTimeMappingFile = `${recordingDir}/word_time_mapping.json`;
+      await FileSystem.writeAsStringAsync(
+        wordTimeMappingFile,
+        JSON.stringify(wordTimeMapping)
+      );
+      console.log("Word-time mapping saved to:", wordTimeMappingFile);
+
+      setUri(fileURI);
+      setRecordingVar(null);
+      setIsRecording(false);
     } catch (err) {
       console.error("Failed to stop recording", err);
     }
   };
-
 
   // _________________________________ RECORDING LOGIC END ______________________________________
 
@@ -193,7 +218,10 @@ export default function App() {
       if (uri) {
         await Sharing.shareAsync(uri);
       } else {
-        Alert.alert("No Recording", "There is no recording available to share.");
+        Alert.alert(
+          "No Recording",
+          "There is no recording available to share."
+        );
       }
     } catch (err) {
       console.error("Failed to share recording", err);
@@ -315,25 +343,14 @@ export default function App() {
   const handleSave = (newFileUri) => {
     setUri(newFileUri);
     isRenameVisible(false);
-    navigation.navigate('home');
+    navigation.navigate("home");
   };
 
-  return (
+  return isRecording ? (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, alignContent: "center", justifyContent: "center" }}>
         <Waveform waveform={waveform} />
       </View>
-      <Text
-        style={{
-          fontFamily: "IBMPlexMono-Medium",
-          color: "black",
-          fontSize: 16,
-          marginTop: "15%",
-          marginHorizontal: "5%",
-        }}
-      >
-        {fileData}
-      </Text>
       <View
         style={{
           flex: 1,
@@ -343,7 +360,9 @@ export default function App() {
         }}
       >
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
             <TouchableOpacity onPress={handleStopButton}>
               <Image
                 source={require("../assets/images/stopButton.png")}
@@ -352,7 +371,9 @@ export default function App() {
               />
             </TouchableOpacity>
           </View>
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
             <Image
               source={require("../assets/images/blob_1.gif")}
               style={{ width: 110, height: 110 }}
@@ -372,8 +393,12 @@ export default function App() {
               {Math.floor(progress % 60)}
             </Text>
           </View>
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <TouchableOpacity onPress={isListening ? pauseRecording : resumeRecording}>
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
+            <TouchableOpacity
+              onPress={isListening ? pauseRecording : resumeRecording}
+            >
               <Image
                 source={
                   isListening
@@ -387,14 +412,15 @@ export default function App() {
           </View>
         </View>
       </View>
-
+    </SafeAreaView>
+  ) : (
+    <SafeAreaView style={{ flex: 1 }}>
       {/* <RenameModal
         visible={isRenameVisible}
         onClose={() => setIsRenameVisible(false)}
         onSave={handleSave}
         fileUri={uri}
       /> */}
-
     </SafeAreaView>
   );
 }

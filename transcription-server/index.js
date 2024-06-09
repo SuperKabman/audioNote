@@ -73,7 +73,7 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
     );
     fs.unlinkSync(filePath);
 
-    res.json({ transcription: transcription });
+    res.json({ transcription: transcription, wordTimeMapping: wordTimeMapping});
   } catch (error) {
     console.error("Error during transcription:", error);
     res.status(500).send("Error during transcription");
