@@ -36,6 +36,7 @@ export default function App() {
   const [chatHistory, setChatHistory] = useState([]);
   const [waveform, setWaveform] = useState(new Array(40).fill(0));
   const [isRenameVisible, setIsRenameVisible] = useState(false);
+  const [filename, setFilename] = useState("");
 
   useEffect(() => {
     getPermissions();
@@ -67,6 +68,8 @@ export default function App() {
       );
     }
   };
+
+  // _________________________________ RECORDING LOGIC START ______________________________________
 
   async function startRecording() {
     try {
@@ -112,28 +115,38 @@ export default function App() {
       await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
     }
   };
+  
 
   const stopRecording = async () => {
     try {
       console.log("Stopping recording...");
       await recordingVar.stopAndUnloadAsync();
       const uri = recordingVar.getURI();
-      console.log("uri: " , uri);
       console.log("Recording stopped and stored");
 
-      const filename = `recording_${new Date().getTime()}.m4a`;
-      await ensureDirExists(FileSystem.documentDirectory);
-      const fileURI = `${FileSystem.documentDirectory}${filename}`;
-      await FileSystem.moveAsync({ from: uri, to: fileURI });
+      // setting the default file name
+      const folder_name = `recording_${new Date().getTime()}`;
+      // setFilename(autogen_name);
 
-      setUri(uri);
+      // renaming the file
+      // isRenameVisible(true);
+
+      // moving the file to the recordings directory
+      const recordingDir = `${FileSystem.documentDirectory}recordings/${folder_name}`;
+      await FileSystem.makeDirectoryAsync(recordingDir, { intermediates: true });
+      const fileURI = `${recordingDir}/voice_recording.m4a`;
+      await FileSystem.moveAsync({ from: uri, to: fileURI });
+      console.log("Recording saved to:", fileURI);
+      const fileInfo = await FileSystem.getInfoAsync(fileURI);
+      console.log("File info:", fileInfo);
+      setUri(fileURI);
       setRecordingVar(null);
       setIsRenameVisible(true);
       console.log("Transcribing audio...");
       const formData = new FormData();
       formData.append("audio", {
         uri,
-        type: Platform.OS === "ios" ? "audio/x-caf" : "audio/mp4",
+        type: Platform.OS === "ios" ? "audio/x-caf" : "audio/m4a",
         name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
       });
 
@@ -154,6 +167,9 @@ export default function App() {
       console.error("Failed to stop recording", err);
     }
   };
+
+
+  // _________________________________ RECORDING LOGIC END ______________________________________
 
   async function playRecording() {
     try {

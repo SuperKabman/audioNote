@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const files = () => {
+const file_details = () => {
   return (
     <View>
-      <Text>files</Text>
+      <Text>file_details</Text>
     </View>
   )
 }
 
-export default files
+export default file_details

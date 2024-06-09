@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "app/App.jsx", "app/(tabs)/_layout.tsx", "app/(tabs)/home.jsx", "app/(tabs)/chat.jsx"  ]
+, "app/App.jsx", "app/(tabs)/_layout.tsx", "app/(tabs)/home.jsx", "app/(tabs)/chat.jsx", "app/(tabs)/files.jsx"  ]
 }
