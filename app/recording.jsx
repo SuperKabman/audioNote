@@ -18,6 +18,7 @@ import OpenAI from "openai";
 import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
 import * as MediaLibrary from "expo-media-library";
 import Waveform from "../components/waveform";
+import RenameModal from "../components/rename_file";
 
 const openai = new OpenAI({
   apiKey: API_KEY,
@@ -34,6 +35,7 @@ export default function App() {
   const [userMessage, setUserMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [waveform, setWaveform] = useState(new Array(40).fill(0));
+  const [isRenameVisible, setIsRenameVisible] = useState(false);
 
   useEffect(() => {
     getPermissions();
@@ -103,14 +105,30 @@ export default function App() {
     }
   }
 
+  const ensureDirExists = async (dir) => {
+    const dirInfo = await FileSystem.getInfoAsync(dir);
+    if (!dirInfo.exists) {
+      console.log('Directory does not exist, creating...');
+      await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+    }
+  };
+
   const stopRecording = async () => {
     try {
       console.log("Stopping recording...");
       await recordingVar.stopAndUnloadAsync();
       const uri = recordingVar.getURI();
+      console.log("uri: " , uri);
       console.log("Recording stopped and stored");
+
+      const filename = `recording_${new Date().getTime()}.m4a`;
+      await ensureDirExists(FileSystem.documentDirectory);
+      const fileURI = `${FileSystem.documentDirectory}${filename}`;
+      await FileSystem.moveAsync({ from: uri, to: fileURI });
+
       setUri(uri);
       setRecordingVar(null);
+      setIsRenameVisible(true);
       console.log("Transcribing audio...");
       const formData = new FormData();
       formData.append("audio", {
@@ -131,6 +149,7 @@ export default function App() {
       const transcription = response.data.transcription;
       console.log("Transcription:", transcription);
       fetchTranscription();
+
     } catch (err) {
       console.error("Failed to stop recording", err);
     }
@@ -277,6 +296,12 @@ export default function App() {
     await stopRecording();
   };
 
+  const handleSave = (newFileUri) => {
+    setUri(newFileUri);
+    isRenameVisible(false);
+    navigation.navigate('home');
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
@@ -346,6 +371,14 @@ export default function App() {
           </View>
         </View>
       </View>
+
+      {/* <RenameModal
+        visible={isRenameVisible}
+        onClose={() => setIsRenameVisible(false)}
+        onSave={handleSave}
+        fileUri={uri}
+      /> */}
+
     </SafeAreaView>
   );
 }
