@@ -129,8 +129,8 @@ export default function App() {
       console.log("Transcribing audio...");
       const formData = new FormData();
       formData.append("audio", {
-        uri,
-        type: Platform.OS === "ios" ? "audio/x-caf" : "audio/m4a",
+        uri: fileURI,
+        type: Platform.OS === "ios" ? "audio/wav" : "audio/m4a",
         name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
       });
 
@@ -158,7 +158,7 @@ export default function App() {
       });
 
       // saving the audio file in the directory
-      const fileURI = `${recordingDir}/voice_recording.m4a`;
+      const fileURI = Platform.OS === "ios" ? `${recordingDir}/recording.wav` : `${recordingDir}/recording.m4a`;
       await FileSystem.moveAsync({ from: uri, to: fileURI });
       console.log("Recording saved to:", fileURI);
       const fileInfo = await FileSystem.getInfoAsync(fileURI);
