@@ -20,7 +20,9 @@ const openai = new OpenAI({ apiKey: API_KEY });
 const responseGeneration = async (userMessage) => {
   try {
     const completion = await openai.chat.completions.create({
-      messages: [{ role: "user", content: userMessage }],
+      messages: [{ role: 'system', content: 'You are a chatbot in an app called AudioNote. This app is used to record audio-notes of conversations, discussions, meetings, lectures, etc. You have the responsibility to answer any questions from any of the audio-notes that the user has made in this app. '},
+        {role:'user', content: userMessage}
+      ],
       model: "gpt-3.5-turbo",
     });
     return completion;
@@ -138,12 +140,12 @@ const styles = StyleSheet.create({
   },
   backButtonContainer: {
     position: "absolute",
-    top: 40,
+    top: 48,
     left: 20,
   },
   backButton: {
-    height: 40,
-    width: 100,
+    height: 32,
+    width: 80,
   },
   messagesContainer: {
     flex: 1,

@@ -1,6 +1,10 @@
 import React from 'react';
 import { StyleSheet, View, ImageBackground, TextInput } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { TouchableOpacity } from 'react-native';
+import { Redirect } from 'expo-router';
+import { useState } from 'react';
+import { Image } from 'react-native'; 
 
 const InputWithIcon = ({ iconName, placeholder }) => (
   <View style={styles.inputContainer}>
@@ -14,6 +18,18 @@ const InputWithIcon = ({ iconName, placeholder }) => (
 );
 
 const App = () => {
+
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+
+  const redirectHome = () => {
+    setShouldRedirect(true);
+  };
+
+  if (shouldRedirect) {
+    context = "";
+    return <Redirect href="/home" />;
+  }
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -32,6 +48,15 @@ const App = () => {
         source={require('../assets/images/profileScribble2.png')}
         style={styles.bottomShape}
       />
+      <TouchableOpacity
+    onPress={redirectHome}
+    style={[styles.backButtonContainer, {width: 80, height: 32}]}
+>
+    <Image
+      source={require("../assets/images/backButton.png")}
+      style={styles.backButton}
+    />
+</TouchableOpacity>
     </View>
   );
 };
@@ -99,6 +124,15 @@ const styles = StyleSheet.create({
     height: 330,
     left: -50,
     bottom: -150,
+  },
+  backButtonContainer: {
+    position: "absolute",
+    top: 55,
+    left: 5,
+  },
+  backButton: {
+    height: 32,
+    width: 80,
   },
 });
 

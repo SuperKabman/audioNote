@@ -169,7 +169,7 @@ export default function App() {
       await FileSystem.writeAsStringAsync(transcriptionFile, transcription);
       console.log("Transcription saved to:", transcriptionFile);
 
-      // saving the metadata in a file
+      //saving the metadata in a file
       const metadataFile = `${recordingDir}/metadata.txt`;
       const recordingLengthSeconds = recordingVar.getDurationMillis() / 1000;
       const metadata = `Recording Date: ${new Date().toLocaleDateString()}\nRecording Length: ${recordingLengthSeconds} seconds`;
@@ -243,11 +243,12 @@ export default function App() {
     }
   };
 
-  const generateResponse = async (Transcription) => {
+  //Summariser for general notes
+  const generateResponseNote = async (Transcription) => {
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: fileData + Transcription }],
+        messages: [{role:'system', content:'You are a summarizing tool for general audio-notes that a person might make at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
       });
 
       console.log("Generated response:", response.choices[0].message.content);
@@ -260,6 +261,63 @@ export default function App() {
       );
     }
   };
+
+  //Summariser for lectures
+  const generateResponseLecture = async (Transcription) => {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{role:'system', content:'You are a summarizing tool for university lectures that a person might record for any class/subject/course or level of study. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
+      });
+
+      console.log("Generated response:", response.choices[0].message.content);
+      setGeneratedResponse(response.choices[0].message.content);
+    } catch (error) {
+      console.error("Failed to generate response:", error);
+      Alert.alert(
+        "Response Generation Failed",
+        "An error occurred while trying to generate the response."
+      );
+    }
+  };
+
+  //Summariser for discussions
+  const generateResponseDiscussion = async (Transcription) => {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{role:'system', content:'You are a summarizing tool for general discussions about anything that a person might have with anyone at any one or multiple people. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
+      });
+
+      console.log("Generated response:", response.choices[0].message.content);
+      setGeneratedResponse(response.choices[0].message.content);
+    } catch (error) {
+      console.error("Failed to generate response:", error);
+      Alert.alert(
+        "Response Generation Failed",
+        "An error occurred while trying to generate the response."
+      );
+    }
+  };
+
+  //Summariser for meetings
+  const generateResponseMeeting = async (Transcription) => {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{role:'system', content:'You are a summarizing tool for formal or informal meetings that a person might record at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
+      });
+
+      console.log("Generated response:", response.choices[0].message.content);
+      setGeneratedResponse(response.choices[0].message.content);
+    } catch (error) {
+      console.error("Failed to generate response:", error);
+      Alert.alert(
+        "Response Generation Failed",
+        "An error occurred while trying to generate the response."
+      );
+    }
+  }
 
   const updateWaveform = async () => {
     const newWaveform = generateMockWaveform(40);
