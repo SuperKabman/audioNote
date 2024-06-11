@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "audionote-424717",
+  "private_key_id": "845c9a49db434d7e5b0f208e25b37f5931de7a2d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCBtdrRsXdFhG+0\nLp3rKMMYH4Z613Sq8XQKDt/K0RjwH8f2AJH7yQ6tAnf9dapW1kAnfOc60pyQUzJd\n9imNVDdMn8YYl/xXayfb+Vwqd96/CV6Cd7l8iV3J+AFrUjDQNdZgiRCj7vPxwE7Z\nngwhec1Snetx0FmeCHcq0VdAqND11Pr1i0aKIR1sGDusei19HGJRCtJQ1L2gU1mJ\nzOb9sQPo6xWb7si2UJwQ2IPWnvGYabppdfC7bx+GiVwJzJu3WxvnseEBUSZo5sdf\n7zAPiyIB3iz1Su/fOUyyL7q4ZTqAESlrpnKGK0DFljGaQkg8hA8oUyI4iPDsxNqQ\nug9sajKxAgMBAAECggEADeuaWY7AzMZzG9SKQMaAdCz4nbj/CFQerpr8ts4h7a3m\nI9HZLjsG8YJQ+56OcqtOT0Ppp40ayFJlbA1oVYaIOMJHht7Tcf5J/3g6GpoACbh+\nWrob6fBEDyd9NNX+mcRtXAbZsP41UpM04x3sZ1tPBw1zoHn1DtoRupf6KTJKMAJN\nn52NmkNDVCpF1KOF1HoFj0gL3+e5w5xNvkBrqXICPcOLXfxkda6TYGXZKzwBGHNF\nmGO4SyOqUF51qLMMnT1TUkWwq1xyxxJwXAbnnmHOycmTYNQI0dGQamnLi6DF/uyk\nI082/cr921XSosRCkf/OREkgPBMV8U3KgoZ/sgPCEQKBgQC20a/T6SMnu5BU8gED\nIqSP23dcZToSv5jfoFOPYt4QYu3R63yoES35VotyVc4gcKb4T7/t0fAZ7f0UGKiG\nCJbm0HSotsCnTzdRfAoAwyKwQuCB8BG/imU3VSFa24VYrMBO9P/InNHNtq9ZNEAE\nugqEVZ8nslKrIgncUvgwFZc5LwKBgQC1od+HT0h+X4XvmcNHeM4iAJtadCLIv5qK\nzgYb5HtEeyaF4MqPBpJdEyo2+mQlAAAsGqI8Bp28zGY1JIJhei99E5xtZOys+roc\nBLqWbZmD0HLgRKyuP/hy4hh+oMgj1p30VQrxEczqv18U2K3FfXAqiNx7nvzJifOW\nOmumP4yaHwKBgQCRBrSZwac+vL8Zc8UzzIaJDEuawz6XYuCN/exrob2ReDk6vrlr\nxf0Xf/0tHT5gY51A/Fq/+TukBjQufgUqFqRGw/TXZepcjy3N+T0iL6pT8ymQSnZ5\n4Pq8M087eUtF9fy0ZgyHA0g4DYT6mcVzOnZfVmDkJ8UGtwDlg/gYhPgqxwKBgQCl\nPfJlYIzcY70vQV12nYIzTwgHH9cxeZd4pnzKTXCT2dIvRFYkDt+Di9cBE4WeX8TI\nWyazo3VH+VEXEfMICahAi2Hp6EKmEKjWqrqx9l4OnMqWHARZttsqcWXFdjL+39bu\nHZyJux8JhjdTeNmG7VrpZ3/ne7oRBM82IkojgndBEwKBgQCokfiWcsCg/sUQQynQ\n72VfiUhbZvNdUQo5+V8XYXD0ydDiqXvWD+IX1MJMZ4vFdPPQTgWw2GS1u5IDBUKi\n1Wvn97EhDhFJAk618mJJ5pmiLQ9rnXzKWZP6ZQ2hQkHYuwXYNkiG9weY2SbHerHi\nDWXJUO+Ug+8idO/BDO+AjrOQ4Q==\n-----END PRIVATE KEY-----\n",
+  "client_email": "siddharth@audionote-424717.iam.gserviceaccount.com",
+  "client_id": "109135942130256154832",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/siddharth%40audionote-424717.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

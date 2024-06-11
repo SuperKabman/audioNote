@@ -145,8 +145,10 @@ export default function App() {
       );
       const transcription = response.data.transcription;
       setFileData(transcription);
-      const wordTimeMapping = response.data.wordTimeMapping;
       console.log("Transcription:", transcription);
+      // const wordTimeMapping = await axios.post(
+      //   `http://${IP_ADDRESS}:3000/getWordTimeMapping`
+      // );
 
       // setting the default file name
       const folder_name = `recording_${new Date().getTime()}`;
@@ -179,12 +181,12 @@ export default function App() {
       // saving the summary in a file
 
       // saving the word-time-mapping
-      const wordTimeMappingFile = `${recordingDir}/word_time_mapping.json`;
-      await FileSystem.writeAsStringAsync(
-        wordTimeMappingFile,
-        JSON.stringify(wordTimeMapping)
-      );
-      console.log("Word-time mapping saved to:", wordTimeMappingFile);
+      // const wordTimeMappingFile = `${recordingDir}/word_time_mapping.json`;
+      // await FileSystem.writeAsStringAsync(
+      //   wordTimeMappingFile,
+      //   JSON.stringify(wordTimeMapping)
+      // );
+      // console.log("Word-time mapping saved to:", wordTimeMappingFile);
 
       setUri(fileURI);
       setRecordingVar(null);
