@@ -147,7 +147,7 @@ export default function App() {
       setFileData(transcription);
       console.log("Transcription:", transcription);
       // const wordTimeMapping = await axios.post(
-      //   `http://${IP_ADDRESS}:3000/getWordTimeMapping`
+      //   `http://${IP_ADDRESS}:8080/getWordTimeMapping`
       // );
 
       // setting the default file name

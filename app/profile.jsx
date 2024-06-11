@@ -1,33 +1,64 @@
-import React from 'react';
-import { StyleSheet, View, ImageBackground, TextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, ImageBackground, TextInput, Text } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { TouchableOpacity } from 'react-native';
 import { Redirect } from 'expo-router';
-import { useState } from 'react';
-import { Image } from 'react-native'; 
+import { auth, firestore } from './firebase'; // Import firestore from your firebase configuration
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { Image } from 'react-native';
+import { signOut } from 'firebase/auth';
 
-const InputWithIcon = ({ iconName, placeholder }) => (
+const InputWithIcon = ({ iconName, placeholder, value }) => (
   <View style={styles.inputContainer}>
     <FontAwesome name={iconName} size={20} color="grey" style={styles.icon} />
     <TextInput
       style={styles.inputText}
       placeholder={placeholder}
       placeholderTextColor="#666"
+      value={value}
+      editable={false} // Make the input non-editable
     />
   </View>
 );
 
 const App = () => {
-
   const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [userData, setUserData] = useState({
+    userName: '',
+    email: '',
+    phoneNumber: '',
+  });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+        if (userDoc.exists()) {
+          setUserData(userDoc.data());
+        } else {
+          console.log('No user data found!');
+        }
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  const handleLogout = () => {
+    try {
+      signOut(auth);
+      setShouldRedirect(true);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+    };
 
   const redirectHome = () => {
     setShouldRedirect(true);
   };
 
   if (shouldRedirect) {
-    context = "";
-    return <Redirect href="/home" />;
+    return <Redirect href="auth/Login" />;
   }
 
   return (
@@ -39,23 +70,25 @@ const App = () => {
         <View style={styles.circle} />
       </ImageBackground>
       <View style={styles.content}>
-        <InputWithIcon iconName="user" placeholder="Username" />
-        <InputWithIcon iconName="envelope" placeholder="Email" />
-       
-        <InputWithIcon iconName="phone" placeholder="Phone Number" />
+        <InputWithIcon iconName="user" placeholder="Username" value={userData.userName} />
+        <InputWithIcon iconName="envelope" placeholder="Email" value={userData.email} />
+        <InputWithIcon iconName="phone" placeholder="Phone Number" value={userData.phoneNumber} />
       </View>
       <ImageBackground
         source={require('../assets/images/profileScribble2.png')}
         style={styles.bottomShape}
       />
       <TouchableOpacity
-    onPress={redirectHome}
-    style={[styles.backButtonContainer, {width: 80, height: 32}]}
->
-    <Image
-      source={require("../assets/images/backButton.png")}
-      style={styles.backButton}
-    />
+        onPress={redirectHome}
+        style={[styles.backButtonContainer, { width: 80, height: 32 }]}
+      >
+        <Image
+          source={require("../assets/images/backButton.png")}
+          style={styles.backButton}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+  <Text style={styles.logoutButtonText}>Logout</Text>
 </TouchableOpacity>
     </View>
   );
@@ -86,7 +119,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     backgroundColor: 'lightgrey',
-    top: 55,
+    top: 75,
   },
   content: {
     flex: 1,
@@ -101,7 +134,7 @@ const styles = StyleSheet.create({
     height: 35,
     backgroundColor: 'lightgrey',
     marginVertical: 25,
-    top: 25,
+    top: 50,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
@@ -111,9 +144,9 @@ const styles = StyleSheet.create({
   },
   inputText: {
     flex: 1,
-    color: 'black', 
-    fontSize: 16, 
-    fontWeight: '500', 
+    color: 'black',
+    fontSize: 16,
+    fontWeight: '500',
   },
   bottomShapeContainer: {
     width: '100%',
@@ -133,6 +166,22 @@ const styles = StyleSheet.create({
   backButton: {
     height: 32,
     width: 80,
+  },
+  logoutButton: {
+    width: '80%',
+    height: 50,
+    backgroundColor: '#f44336',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+    marginVertical: 10,
+    bottom: 70,
+    left: 40,
+  },
+  logoutButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '500',
   },
 });
 
