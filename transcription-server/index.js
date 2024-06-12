@@ -9,7 +9,7 @@ const cors = require("cors");
 const OpenAI = require("openai");
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 const upload = multer({ dest: "uploads/" });
 const speechClient = new SpeechClient();
 
@@ -34,13 +34,10 @@ const openai = new OpenAI({
 
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   try {
-    const filePath = path.join(__dirname, req.file.path);
-
-    const audioData = fs.readFileSync(filePath);
-    const base64AudioData = Buffer.from(audioData).toString("base64");
+    const filePath = req.file.path;
 
     const transcription = await openai.audio.transcriptions.create({
-      audio: base64AudioData,
+      audio: fs.createReadStream(filePath),
       model: "whisper-1",
       response_format: "verbose_json",
       timestamp_granularity: ["word"],
