@@ -15,7 +15,7 @@ import * as Sharing from "expo-sharing";
 import { Audio } from "expo-av";
 import axios from "axios";
 import OpenAI from "openai";
-import { API_KEY, Google_API_KEY, IP_ADDRESS } from "../keys/config";
+import { API_KEY, Google_API_KEY, LOCAL_IP_ADDRESS } from "../keys/config";
 import * as MediaLibrary from "expo-media-library";
 import Waveform from "../components/waveform";
 import RenameModal from "../components/rename_file";
@@ -60,7 +60,7 @@ export default function App() {
 
   const fetchTranscription = async () => {
     try {
-      const response = await axios.get(`http://${IP_ADDRESS}:8080/file`);
+      const response = await axios.get(`http://${LOCAL_IP_ADDRESS}:8080/file`);
       setFileData(response.data);
     } catch (error) {
       console.error("Error fetching transcription:", error);
@@ -134,20 +134,16 @@ export default function App() {
         name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
       });
 
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:8080/transcribe`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/transcribeFromFile`, {
+        filePath: uri,
+      });
+
+
       const transcription = response.data.transcription;
       setFileData(transcription);
       console.log("Transcription:", transcription);
       // const wordTimeMapping = await axios.post(
-      //   `http://${IP_ADDRESS}:8080/getWordTimeMapping`
+      //   `http://${LOCAL_IP_ADDRESS}:8080/getWordTimeMapping`
       // );
 
       // setting the default file name
@@ -236,7 +232,7 @@ export default function App() {
 
   const handleResetFile = async () => {
     try {
-      await axios.post(`http://${IP_ADDRESS}:8080/resetTranscriptionFile`);
+      await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/resetTranscriptionFile`);
       setFileData("");
       setGeneratedResponse("");
     } catch (error) {

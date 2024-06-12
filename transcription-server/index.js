@@ -50,6 +50,28 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
   }
 });
 
+app.post("/transcribeFromFile", async (req, res) => {
+  try {
+    const filePath = req.body.filePath; // Assuming you're sending the file path in the request body
+
+    // Read the audio file from the provided path
+    const audioData = fs.readFileSync(filePath);
+
+    const transcription = await openai.audio.transcriptions.create({
+      audio: audioData,
+      model: "whisper-1",
+      response_format: "verbose_json",
+      timestamp_granularity: ["word"],
+    });
+
+    console.log("Transcription:", transcription);
+    res.send(transcription);
+  } catch (error) {
+    console.error("Error during transcription:", error);
+    res.status(500).send("Error during transcription");
+  }
+});
+
 app.post("/resetTranscriptionFile", (req, res) => {
   try {
     fs.writeFileSync(transcriptionFilePath, "");
