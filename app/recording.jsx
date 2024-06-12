@@ -125,7 +125,7 @@ export default function App() {
       await recordingVar.stopAndUnloadAsync();
       const uri = recordingVar.getURI();
       console.log("Recording stopped and stored");
-
+      console.log('uri', uri);
       console.log("Transcribing audio...");
       // const formData = new FormData();
       // formData.append("audio", {
@@ -139,20 +139,22 @@ export default function App() {
       // });
 
       const formData = new FormData();
-      formData.append("file", uri)
-      formData.append("model", "whisper-1")
-      formData.append("response_format", "verbose_json")
-      formData.append("timestamp_granularity", ["word"])
+      formData.append("audio", {
+        uri,
+        type: Platform.OS === "ios" ? "audio/wav" : "audio/m4a",
+        name: "recording.m4a",
+      });
 
       const headers = {
         'Content-Type': 'multipart/form',
         'Authorization': `Bearer ${API_KEY}`
       }
 
-      const response = await axios.post('https://api.open.com/v1/whisper/transcribe', formData, { headers: headers });
+      const response = await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/transcribe`, formData, { headers: headers });
       console.log("Transcription response:", response.data);
 
       const transcription = response.data.transcription;
+      
       setFileData(transcription);
       console.log("Transcription:", transcription);
       // const wordTimeMapping = await axios.post(
@@ -168,6 +170,8 @@ export default function App() {
         intermediates: true,
       });
 
+  
+
       // saving the audio file in the directory
       const fileURI = Platform.OS === "ios" ? `${recordingDir}/recording.wav` : `${recordingDir}/recording.m4a`;
       await FileSystem.moveAsync({ from: uri, to: fileURI });
@@ -176,16 +180,16 @@ export default function App() {
       console.log("File info:", fileInfo);
 
       // saving the transcription in a file
-      const transcriptionFile = `${recordingDir}/transcription.txt`;
-      await FileSystem.writeAsStringAsync(transcriptionFile, transcription);
-      console.log("Transcription saved to:", transcriptionFile);
+      // const transcriptionFile = `${recordingDir}/transcription.txt`;
+      // await FileSystem.writeAsStringAsync(transcriptionFile, transcription);
+      // console.log("Transcription saved to:", transcriptionFile);
 
-      //saving the metadata in a file
-      const metadataFile = `${recordingDir}/metadata.txt`;
-      const recordingLengthSeconds = recordingVar.getDurationMillis() / 1000;
-      const metadata = `Recording Date: ${new Date().toLocaleDateString()}\nRecording Length: ${recordingLengthSeconds} seconds`;
-      await FileSystem.writeAsStringAsync(metadataFile, metadata);
-      console.log("Metadata saved to:", metadataFile);
+      // //saving the metadata in a file
+      // const metadataFile = `${recordingDir}/metadata.txt`;
+      // const recordingLengthSeconds = recordingVar.getDurationMillis() / 1000;
+      // const metadata = `Recording Date: ${new Date().toLocaleDateString()}\nRecording Length: ${recordingLengthSeconds} seconds`;
+      // await FileSystem.writeAsStringAsync(metadataFile, metadata);
+      // console.log("Metadata saved to:", metadataFile);
 
       // saving the summary in a file
 

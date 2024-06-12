@@ -1,17 +1,15 @@
 const express = require("express");
 const multer = require("multer");
-const { SpeechClient } = require("@google-cloud/speech");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
-const { Configuration, OpenAIApi } = require("openai");
+const axios = require("axios");
+const FormData = require('form-data');
 const cors = require("cors");
-const OpenAI = require("openai");
-
+const { exec } = require("child_process");
 const app = express();
 const port = process.env.PORT || 8080;
 const upload = multer({ dest: "uploads/" });
-const speechClient = new SpeechClient();
 
 app.use(cors());
 app.use(express.json());
@@ -28,29 +26,72 @@ const wordTimeMappingFilePath = path.join(
   "word_time_mapping.json"
 );
 
-const openai = new OpenAI({
-  apiKey: "",
-});
-
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   try {
-    const filePath = req.file.path;
+    if (!req.file) {
+      return res.status(400).send({ error: "No file uploaded" });
+    }
 
-    const transcription = await openai.audio.transcriptions.create({
-      audio: fs.createReadStream(filePath),
-      model: "whisper-1",
-      response_format: "verbose_json",
-      timestamp_granularity: ["word"],
+    const filePath = req.file.path;
+    const convertedFilePath = path.join(__dirname, "uploads", "converted.mp3");
+
+    // Convert WAV to MP3 using ffmpeg
+    await convertToMP3(filePath, convertedFilePath);
+
+    // Create form data for the OpenAI API
+    const formData = new FormData();
+    formData.append("file", fs.createReadStream(convertedFilePath));
+    formData.append("model", "whisper-1");
+    formData.append("language", "en-US"); 
+    formData.append("response_format", "verbose_json"); 
+    formData.append("timestamp_granularity", ["word"]);  
+
+    const headers = {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      ...formData.getHeaders(),
+    };
+
+    // Make the request to the OpenAI API
+    const response = await axios.post(
+      "https://api.openai.com/v1/audio/transcriptions",
+      formData,
+      { headers: headers }
+    );
+
+    // Delete the files after processing
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error("Error deleting file:", err);
+      }
+    });
+    fs.unlink(convertedFilePath, (err) => {
+      if (err) {
+        console.error("Error deleting converted file:", err);
+      }
     });
 
-    console.log("Transcription:", transcription);
+    res.send(response.data);
   } catch (error) {
-    console.error("Error during transcription:", error);
-    res.status(500).send("Error during transcription");
+    console.error("Error during transcription:", error.response ? error.response.data : error.message);
+    res.status(500).send({ error: "Error during transcription" });
   }
 });
 
+async function convertToMP3(inputFile, outputFile) {
+  return new Promise((resolve, reject) => {
+    const command = `ffmpeg -i ${inputFile} -vn -ar 44100 -ac 2 -b:a 192k ${outputFile}`;
 
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error("Error converting file:", error);
+        reject(error);
+      } else {
+        console.log("File converted successfully");
+        resolve();
+      }
+    });
+  });
+}
 
 app.post("/resetTranscriptionFile", (req, res) => {
   try {
@@ -93,7 +134,7 @@ app.post("/find-sentence", (req, res) => {
     for (let i = 0; i < wordTimeMapping.length; i++) {
       if (
         wordTimeMapping[i].word.toLowerCase() === words[wordIndex].toLowerCase()
-      ) {
+      ) { 
         if (wordIndex === 0) {
           startTime = wordTimeMapping[i].startTime;
         }
