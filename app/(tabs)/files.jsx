@@ -1,7 +1,13 @@
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import * as FileSystem from 'expo-file-system'
-import { useNavigation } from '@react-navigation/native'
+import {
+  View,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import * as FileSystem from "expo-file-system";
+import { useNavigation } from "@react-navigation/native";
 
 const Files = () => {
   const [directories, setDirectories] = useState([]);
@@ -9,7 +15,9 @@ const Files = () => {
 
   const listDirectories = async () => {
     try {
-      const items = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + 'recordings');
+      const items = await FileSystem.readDirectoryAsync(
+        FileSystem.documentDirectory + "recordings"
+      );
       const dirs = [];
 
       for (const item of items) {
@@ -17,10 +25,18 @@ const Files = () => {
         const itemInfo = await FileSystem.getInfoAsync(itemPath);
 
         if (itemInfo.isDirectory) {
-          dirs.push(item);
+          const metadataPath = `${itemPath}/metadata.json`;
+          const metadataRaw = await FileSystem.readAsStringAsync(metadataPath);
+          const metadata = JSON.parse(metadataRaw);
+
+          dirs.push({
+            name: item,
+            path: itemPath,
+            recordingLength: metadata.recordingLength,
+            recordingDate: metadata.recordingDate,
+          });
         }
       }
-
       console.log("Directories in directory:", dirs);
       setDirectories(dirs);
     } catch (error) {
@@ -28,9 +44,9 @@ const Files = () => {
     }
   };
 
-  const handleDirectoryClick = (directory) => {
-    navigation.navigate('file_details');
-    console.log(`Directory ${directory} clicked`);
+  const handleDirectoryClick = (path) => {
+    navigation.navigate("file_details", { path });
+    console.log(`Directory ${path} clicked`);
   };
 
   useEffect(() => {
@@ -41,34 +57,45 @@ const Files = () => {
     <SafeAreaView>
       <View style={styles.container}>
         {directories.map((directory, index) => (
-          <TouchableOpacity key={index} style={styles.buttonContainer} onPress={() => handleDirectoryClick(directory)}>
-            <Text style={styles.buttonText}>{directory}</Text>
+          <TouchableOpacity
+            key={index}
+            style={styles.buttonContainer}
+            onPress={() => handleDirectoryClick(directory.path)}
+          >
+            <Text style={styles.heading}>{directory.name}</Text>
+            <Text style={styles.metadata}>{directory.recordingLength}</Text>
+            <Text style={styles.metadata}>{directory.recordingDate}</Text>
           </TouchableOpacity>
         ))}
       </View>
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: "5%",
-    marginVertical: "10%"
+    marginVertical: "10%",
   },
   buttonContainer: {
     margin: 10,
     borderRadius: 10,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: 'black',
-    backgroundColor: 'black',
-    padding: 10
+    borderColor: "black",
+    backgroundColor: "black",
+    padding: 10,
   },
-  buttonText: {
-    color: 'white',
-    textAlign: 'left',
-    fontFamily: 'IBMPlexMono-Medium'
-  }
+  heading: {
+    color: "white",
+    textAlign: "left",
+    fontFamily: "IBMPlexMono-Medium",
+  },
+  metadata: {
+    color: "white",
+    textAlign: "left",
+    fontFamily: "IBMPlexMono-Medium",
+  },
 });
 
 export default Files;
