@@ -130,19 +130,13 @@ export default function App() {
       const formData = new FormData();
       formData.append("audio", {
         uri: fileURI,
-        type: Platform.OS === "ios" ? "audio/wav" : "audio/m4a",
-        name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
       });
 
       const response = await axios.post(
         `http://${IP_ADDRESS}:8080/transcribe`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formData
       );
+
       const transcription = response.data.transcription;
       setFileData(transcription);
       console.log("Transcription:", transcription);

@@ -37,9 +37,10 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
     const filePath = path.join(__dirname, req.file.path);
 
     const audioData = fs.readFileSync(filePath);
+    const base64AudioData = Buffer.from(audioData).toString("base64");
 
     const transcription = await openai.audio.transcriptions.create({
-      audio: audioData,
+      audio: base64AudioData,
       model: "whisper-1",
       response_format: "verbose_json",
       timestamp_granularity: ["word"],
