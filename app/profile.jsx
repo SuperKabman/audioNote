@@ -14,6 +14,9 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { Image } from "react-native";
 import { signOut } from "firebase/auth";
+import Scribble from "../assets/images/profileScribble1SVG.svg";
+import Scribbles from "../assets/images/profileScribble2SVG.svg"
+import Backbutton from "../assets/images/backbuttonSVG.svg";
 
 const InputWithIcon = ({ iconName, placeholder, value }) => (
   <View style={styles.inputContainer}>
@@ -69,12 +72,7 @@ const App = () => {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={require("../assets/images/profileScribble1.png")}
-        style={styles.topShape}
-      >
-        <View style={styles.circle} />
-      </ImageBackground>
+      <Scribble height={500} width={500} top={-150} left = {-55} />
       <View style={styles.content}>
         <InputWithIcon
           iconName="user"
@@ -92,18 +90,12 @@ const App = () => {
           value={userData.phoneNumber}
         />
       </View>
-      <ImageBackground
-        source={require("../assets/images/profileScribble2.png")}
-        style={styles.bottomShape}
-      />
+      <Scribbles height={500} width={500} left = {-55} />
       <TouchableOpacity
         onPress={redirectHome}
         style={[styles.backButtonContainer, { width: 80, height: 32 }]}
       >
-        <Image
-          source={require("../assets/images/backButton.png")}
-          style={styles.backButton}
-        />
+        <Backbutton top={-8} left = {-3}/>
       </TouchableOpacity>
       <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
         <Text style={styles.logoutButtonText}>Logout</Text>
@@ -152,7 +144,7 @@ const styles = StyleSheet.create({
     height: 35,
     backgroundColor: "lightgrey",
     marginVertical: 25,
-    top: 50,
+    top: -100,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
@@ -178,7 +170,7 @@ const styles = StyleSheet.create({
   },
   backButtonContainer: {
     position: "absolute",
-    top: 55,
+    top: 65,
     left: 5,
   },
   backButton: {
@@ -193,7 +185,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 5,
     marginVertical: 10,
-    bottom: 70,
+    bottom: 320,
     left: 40,
   },
   logoutButtonText: {

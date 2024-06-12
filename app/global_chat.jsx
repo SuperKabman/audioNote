@@ -14,6 +14,7 @@ import OpenAI from "openai";
 import { Redirect } from "expo-router";
 import { API_KEY } from "@/keys/config";
 import { KeyboardAvoidingView, Platform } from "react-native";
+import Backbutton from "../assets/images/backbuttonSVG.svg";
 
 const openai = new OpenAI({ apiKey: API_KEY });
 
@@ -86,10 +87,7 @@ const botMessage = response.choices[0].message.content;
         onPress={redirectHome}
         style={styles.backButtonContainer}
       >
-        <Image
-          source={require("../assets/images/backButton.png")}
-          style={styles.backButton}
-        />
+        <Backbutton />
       </TouchableOpacity>
       <ScrollView style={styles.messagesContainer}>
         {messages.map((message, index) => (
@@ -132,10 +130,10 @@ const styles = StyleSheet.create({
   },
   canvas: {
     position: "absolute",
-    height: "87%",
+    height: "85%",
     width: "95%",
     left: "2.5%",
-    top: "10%",
+    top: "12%",
     borderRadius: 40,
   },
   backButtonContainer: {
@@ -150,7 +148,7 @@ const styles = StyleSheet.create({
   messagesContainer: {
     flex: 1,
     padding: 20,
-    marginTop: 80,
+    marginTop: 90,
     marginBottom: 60,
     opacity: 20,
   },
