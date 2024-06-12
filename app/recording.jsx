@@ -60,7 +60,7 @@ export default function App() {
 
   const fetchTranscription = async () => {
     try {
-      const response = await axios.get(`http://${IP_ADDRESS}:3000/file`);
+      const response = await axios.get(`http://${IP_ADDRESS}:8080/file`);
       setFileData(response.data);
     } catch (error) {
       console.error("Error fetching transcription:", error);
@@ -135,7 +135,7 @@ export default function App() {
       });
 
       const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/transcribe`,
+        `http://${IP_ADDRESS}:8080/transcribe`,
         formData,
         {
           headers: {
@@ -236,7 +236,7 @@ export default function App() {
 
   const handleResetFile = async () => {
     try {
-      await axios.post(`http://${IP_ADDRESS}:3000/resetTranscriptionFile`);
+      await axios.post(`http://${IP_ADDRESS}:8080/resetTranscriptionFile`);
       setFileData("");
       setGeneratedResponse("");
     } catch (error) {
@@ -411,6 +411,7 @@ export default function App() {
       <View style={{ flex: 1, alignContent: "center", justifyContent: "center" }}>
         <Waveform waveform={waveform} />
       </View>
+      <Text>{fileData}</Text>
       <View
         style={{
           flex: 1,

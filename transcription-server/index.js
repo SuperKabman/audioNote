@@ -6,6 +6,7 @@ const path = require("path");
 require("dotenv").config();
 const { Configuration, OpenAIApi } = require("openai");
 const cors = require("cors");
+const OpenAI = require("openai");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -27,53 +28,24 @@ const wordTimeMappingFilePath = path.join(
   "word_time_mapping.json"
 );
 
+const openai = new OpenAI({
+  apiKey: "",
+});
+
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   try {
     const filePath = path.join(__dirname, req.file.path);
-    const audio = {
-      content: fs.readFileSync(filePath).toString("base64"),
-    };
 
-    const config = {
-      model: "latest_short",
-      encoding: req.file.mimetype === "audio/x-caf" ? "LINEAR16" : "MP3",
-      sampleRateHertz: 44100,
-      enableWordTimeOffsets: true,
-      enableWordConfidence: true,
-      languageCode: "en-US",
-    };
+    const audioData = fs.readFileSync(filePath);
 
-    const request = {
-      audio: audio,
-      config: config,
-    };
-
-    const [operation] = await speechClient.longRunningRecognize(request);
-    const [response] = await operation.promise();
-    const transcription = response.results
-      .map((result) => result.alternatives[0].transcript)
-      .join("\n");
-
-    const wordTimeMapping = [];
-    response.results.forEach((result) => {
-      result.alternatives[0].words.forEach((wordInfo) => {
-        wordTimeMapping.push({
-          word: wordInfo.word,
-          startTime:
-            wordInfo.startTime.seconds + wordInfo.startTime.nanos / 1e9,
-          endTime: wordInfo.endTime.seconds + wordInfo.endTime.nanos / 1e9,
-        });
-      });
+    const transcription = await openai.audio.transcriptions.create({
+      audio: audioData,
+      model: "whisper-1",
+      response_format: "verbose_json",
+      timestamp_granularity: ["word"],
     });
 
-    fs.appendFileSync(transcriptionFilePath, transcription + "\n");
-    fs.writeFileSync(
-      wordTimeMappingFilePath,
-      JSON.stringify(wordTimeMapping, null, 2)
-    );
-    fs.unlinkSync(filePath);
-
-    res.json({ transcription: transcription, wordTimeMapping: wordTimeMapping});
+    console.log("Transcription:", transcription);
   } catch (error) {
     console.error("Error during transcription:", error);
     res.status(500).send("Error during transcription");
@@ -102,14 +74,16 @@ app.get("/file", (req, res) => {
   });
 });
 
-app.post('/find-sentence', (req, res) => {
+app.post("/find-sentence", (req, res) => {
   const { sentence } = req.body;
   if (!sentence) {
     return res.status(400).send("Sentence is required.");
   }
 
   try {
-    const wordTimeMapping = JSON.parse(fs.readFileSync(wordTimeMappingFilePath));
+    const wordTimeMapping = JSON.parse(
+      fs.readFileSync(wordTimeMappingFilePath)
+    );
     const words = sentence.split(" ");
 
     let startTime = null;
@@ -117,7 +91,9 @@ app.post('/find-sentence', (req, res) => {
     let wordIndex = 0;
 
     for (let i = 0; i < wordTimeMapping.length; i++) {
-      if (wordTimeMapping[i].word.toLowerCase() === words[wordIndex].toLowerCase()) {
+      if (
+        wordTimeMapping[i].word.toLowerCase() === words[wordIndex].toLowerCase()
+      ) {
         if (wordIndex === 0) {
           startTime = wordTimeMapping[i].startTime;
         }
