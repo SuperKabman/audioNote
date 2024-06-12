@@ -12,7 +12,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 const upload = multer({ dest: "uploads/" });
 const speechClient = new SpeechClient();
-
+const { isDataUri, openAssetAsync } = require('expo-file-system');
 app.use(cors());
 app.use(express.json());
 
@@ -52,10 +52,15 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 
 app.post("/transcribeFromFile", async (req, res) => {
   try {
-    const filePath = req.body.filePath; // Assuming you're sending the file path in the request body
+    const filePath = req.body.filePath;
 
-    // Read the audio file from the provided path
-    const audioData = fs.readFileSync(filePath);
+    let audioData;
+    if (isDataUri(filePath)) {
+      const asset = await openAssetAsync(filePath, { md5: true });
+      audioData = asset.data;
+    } else {
+      audioData = fs.readFileSync(filePath);
+    }
 
     const transcription = await openai.audio.transcriptions.create({
       audio: audioData,
