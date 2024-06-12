@@ -12,7 +12,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 const upload = multer({ dest: "uploads/" });
 const speechClient = new SpeechClient();
-const { isDataUri, openAssetAsync } = require('expo-file-system');
+
 app.use(cors());
 app.use(express.json());
 
@@ -50,32 +50,7 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
   }
 });
 
-app.post("/transcribeFromFile", async (req, res) => {
-  try {
-    const filePath = req.body.filePath;
 
-    let audioData;
-    if (isDataUri(filePath)) {
-      const asset = await openAssetAsync(filePath, { md5: true });
-      audioData = asset.data;
-    } else {
-      audioData = fs.readFileSync(filePath);
-    }
-
-    const transcription = await openai.audio.transcriptions.create({
-      audio: audioData,
-      model: "whisper-1",
-      response_format: "verbose_json",
-      timestamp_granularity: ["word"],
-    });
-
-    console.log("Transcription:", transcription);
-    res.send(transcription);
-  } catch (error) {
-    console.error("Error during transcription:", error);
-    res.status(500).send("Error during transcription");
-  }
-});
 
 app.post("/resetTranscriptionFile", (req, res) => {
   try {
