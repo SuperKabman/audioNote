@@ -127,17 +127,30 @@ export default function App() {
       console.log("Recording stopped and stored");
 
       console.log("Transcribing audio...");
+      // const formData = new FormData();
+      // formData.append("audio", {
+      //   uri: uri,
+      //   type: Platform.OS === "ios" ? "audio/wav" : "audio/m4a",
+      //   name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
+      // });
+
+      // const response = await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/transcribeFromFile`, {
+      //   filePath: uri,
+      // });
+
       const formData = new FormData();
-      formData.append("audio", {
-        uri: uri,
-        type: Platform.OS === "ios" ? "audio/wav" : "audio/m4a",
-        name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
-      });
+      formData.append("file", uri)
+      formData.append("model", "whisper-1")
+      formData.append("response_format", "verbose_json")
+      formData.append("timestamp_granularity", ["word"])
 
-      const response = await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/transcribeFromFile`, {
-        filePath: uri,
-      });
+      const headers = {
+        'Content-Type': 'multipart/form',
+        'Authorization': `Bearer ${API_KEY}`
+      }
 
+      const response = await axios.post('https://api.open.com/v1/whisper/transcribe', formData, { headers: headers });
+      console.log("Transcription response:", response.data);
 
       const transcription = response.data.transcription;
       setFileData(transcription);
