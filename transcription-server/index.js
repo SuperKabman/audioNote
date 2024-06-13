@@ -14,8 +14,16 @@ const upload = multer({ dest: "uploads/" });
 app.use(cors());
 app.use(express.json());
 
-const transcriptionFilePath = path.join(__dirname, "./transcriptionFile(s)", "transcription.txt");
-const wordTimeMappingFilePath = path.join(__dirname, "./transcriptionFile(s)", "word_time_mapping.json");
+const transcriptionFilePath = path.join(
+  __dirname,
+  "./transcriptionFile(s)",
+  "transcription.txt"
+);
+const wordTimeMappingFilePath = path.join(
+  __dirname,
+  "./transcriptionFile(s)",
+  "word_time_mapping.json"
+);
 
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   try {
@@ -29,52 +37,51 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
     console.log("Uploaded file type:", fileType);
 
     // Check if the uploaded file is a WAV file (audio/vnd.wave)
-    if (fileType === "audio/vnd.wave") {
-      const convertedFilePath = path.join(__dirname, "uploads", "converted.mp3");
-        console.log('Converted file path:', convertedFilePath);
-        console.log('api key:', process.env.OPENAI_API_KEY);
+    if (fileType === "audio/vnd.wave" || fileType === "audio/m4a") {
+      const convertedFilePath = path.join(
+        __dirname,
+        "uploads",
+        "converted.mp3"
+      );
+      console.log("Converted file path:", convertedFilePath);
+      console.log("api key:", process.env.OPENAI_API_KEY);
       try {
         await convertToMP3(filePath, convertedFilePath);
-        
       } catch (error) {
         console.error("Error converting file to MP3:", error.message);
         return res.status(500).send({ error: "Failed to convert file to MP3" });
       }
 
-      
-
       // Use the converted MP3 file for transcription
       const formData = new FormData();
-formData.append("file", fs.createReadStream(convertedFilePath));
-formData.append('model', "whisper-1");
+      formData.append("file", fs.createReadStream(convertedFilePath));
+      formData.append("model", "whisper-1");
 
+      const headers = {
+        Authorization: `Bearer sk-proj-mwk4p3idrv3rzkJtElxFT3BlbkFJVjp4tnLPFWBuY5lj02qK`,
+        ...formData.getHeaders(),
+      };
 
-const headers = {
-  Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-  ...formData.getHeaders(),
-};
+      console.log("Headers:", headers);
+      console.log("FormData:", formData);
 
-console.log("Headers:", headers);
-console.log("FormData:", formData);
+      try {
+        const response = await axios.post(
+          "https://api.openai.com/v1/audio/transcriptions",
+          formData,
+          { headers }
+        );
 
-try {
-  const response = await axios.post(
-    "https://api.openai.com/v1/audio/transcriptions",
-    formData,
-    { headers }
-  );
+        console.log("API response:", response.data);
 
-  console.log("API response:", response.data);
+        const transcription = response.data.text;
 
-  const transcription = response.data.transcription;
-
-  res.send({ transcription });
-} catch (error) {
-  console.error("Error making API request:", error);
-  console.error("API response data:", error.response.data);
-  res.status(500).send({ error: "Error transcribing audio" });
-}
-
+        res.send({ transcription });
+      } catch (error) {
+        console.error("Error making API request:", error);
+        console.error("API response data:", error.response.data);
+        res.status(500).send({ error: "Error transcribing audio" });
+      }
 
       // Clean up: delete uploaded and converted files
       fs.unlink(filePath, (err) => {
@@ -95,7 +102,7 @@ try {
       formData.append("language", "en-US");
 
       const headers = {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer sk-proj-mwk4p3idrv3rzkJtElxFT3BlbkFJVjp4tnLPFWBuY5lj02qK`,
         ...formData.getHeaders(),
       };
 
@@ -132,7 +139,8 @@ try {
 
 async function convertToMP3(inputFile, outputFile) {
   return new Promise((resolve, reject) => {
-    const command = `ffmpeg -i ${inputFile} -vn -ar 44100 -ac 2 -b:a 192k ${outputFile}`;
+    // Quote the file paths to handle spaces in the paths
+    const command = `ffmpeg -i "${inputFile}" -vn -ar 44100 -ac 2 -b:a 192k "${outputFile}"`;
 
     exec(command, (error, stdout, stderr) => {
       if (error) {
@@ -176,7 +184,9 @@ app.post("/find-sentence", (req, res) => {
   }
 
   try {
-    const wordTimeMapping = JSON.parse(fs.readFileSync(wordTimeMappingFilePath));
+    const wordTimeMapping = JSON.parse(
+      fs.readFileSync(wordTimeMappingFilePath)
+    );
     const words = sentence.split(" ");
 
     let startTime = null;
@@ -184,7 +194,9 @@ app.post("/find-sentence", (req, res) => {
     let wordIndex = 0;
 
     for (let i = 0; i < wordTimeMapping.length; i++) {
-      if (wordTimeMapping[i].word.toLowerCase() === words[wordIndex].toLowerCase()) {
+      if (
+        wordTimeMapping[i].word.toLowerCase() === words[wordIndex].toLowerCase()
+      ) {
         if (wordIndex === 0) {
           startTime = wordTimeMapping[i].startTime;
         }
