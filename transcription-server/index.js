@@ -10,8 +10,10 @@ const { exec } = require("child_process");
 const app = express();
 const port = process.env.PORT || 8080;
 const upload = multer({ dest: "uploads/" });
-const OpenAI  = require('openai');
-const openai = new OpenAI(process.env.OPENAI_API_KEY);
+const OpenAI = require("openai");
+const openai = new OpenAI({
+  apiKey: "sk-proj-mwk4p3idrv3rzkJtElxFT3BlbkFJVjp4tnLPFWBuY5lj02qK",
+});
 
 app.use(cors());
 app.use(express.json());
@@ -50,10 +52,9 @@ const generateTitle = async (Summary) => {
     });
 
     console.log("Generated response:", response.choices[0].message.content);
-    return response.choices[0].message.content; 
+    return response.choices[0].message.content;
   } catch (error) {
     console.error("Failed to generate response:", error);
-    
   }
 };
 
@@ -88,7 +89,8 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
       const formData = new FormData();
       formData.append("file", fs.createReadStream(convertedFilePath));
       formData.append("model", "whisper-1");
-      formData.append("language", "en"); 
+      formData.append("language", "en");
+      formData.append("response_format", "verbose_json");
 
       const headers = {
         Authorization: `Bearer sk-proj-mwk4p3idrv3rzkJtElxFT3BlbkFJVjp4tnLPFWBuY5lj02qK`,
@@ -108,27 +110,38 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
         console.log("API response:", response.data);
 
         const transcription = response.data.text;
+        // summary function
 
         let summary;
-    try {
-      summary = await generateResponseNote(transcription);
+        try {
+          summary = await generateResponseNote(transcription);
         } catch (error) {
           console.error("Error generating summary:", error);
           return res.status(500).send({ error: "Error generating summary" });
         }
-    try {
-      title = await generateTitle(summary);
+
+        const wordTimeMapping = response.data.segments.map((segment) => {
+          return {
+            word: segment.text,
+            startTime: segment.start,
+            endTime: segment.end,
+          };
+        });
+
+        let title;
+        try {
+          title = await generateTitle(summary);
         } catch (error) {
           console.error("Error generating title:", error);
           return res.status(500).send({ error: "Error generating title" });
-    }
+        }
 
-        res.send({ transcription:transcription, summary:summary, title:title });
-        } catch (error) {
+        res.send({ transcription: transcription, summary: summary, title:title, wordTimeMapping: wordTimeMapping});
+      } catch (error) {
         console.error("Error making API request:", error);
         console.error("API response data:", error.response.data);
         res.status(500).send({ error: "Error transcribing audio" });
-        }
+      }
       // Clean up: delete uploaded and converted files
       fs.unlink(filePath, (err) => {
         if (err) {
@@ -164,19 +177,19 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
         const transcription = response.data.transcription;
 
         let summary;
-    try {
-      summary = await generateResponseNote(transcription);
+        try {
+          summary = await generateResponseNote(transcription);
         } catch (error) {
           console.error("Error generating summary:", error);
           return res.status(500).send({ error: "Error generating summary" });
         }
 
-        res.send({ transcription:transcription, summary:summary });
-        } catch (error) {
+        res.send({ transcription: transcription, summary: summary });
+      } catch (error) {
         console.error("Error making API request:", error);
         console.error("API response data:", error.response.data);
         res.status(500).send({ error: "Error transcribing audio" });
-        }
+      }
       // Clean up: delete uploaded file
       fs.unlink(filePath, (err) => {
         if (err) {
@@ -195,13 +208,18 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 async function convertToMP3(inputFile, outputFile) {
   return new Promise((resolve, reject) => {
     // Quote the file paths to handle spaces in the paths
+
     const command = `ffmpeg -i "${inputFile}" -vn -ar 44100 -ac 2 -b:a 192k "${outputFile}"`;
 
     exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error("Error converting file:", error);
         console.error("FFmpeg stderr:", stderr);
-        reject(new Error("Failed to convert file. Please check the file format and try again."));
+        reject(
+          new Error(
+            "Failed to convert file. Please check the file format and try again."
+          )
+        );
       } else {
         console.log("File converted successfully");
         resolve();
@@ -209,28 +227,6 @@ async function convertToMP3(inputFile, outputFile) {
     });
   });
 }
-
-app.post("/resetTranscriptionFile", (req, res) => {
-  try {
-    fs.writeFileSync(transcriptionFilePath, "");
-    fs.writeFileSync(wordTimeMappingFilePath, "");
-    res.send("Transcription file reset successfully");
-  } catch (error) {
-    console.error("Error resetting transcription file:", error);
-    res.status(500).send("Error resetting transcription file.");
-  }
-});
-
-app.get("/file", (req, res) => {
-  res.sendFile(transcriptionFilePath, (err) => {
-    if (err) {
-      console.error("Error sending file:", err);
-      res.status(err.status).end();
-    } else {
-      console.log("File sent successfully.");
-    }
-  });
-});
 
 app.post("/find-sentence", (req, res) => {
   const { sentence } = req.body;

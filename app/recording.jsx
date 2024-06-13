@@ -6,7 +6,7 @@ import {
   Text,
   Alert,
   Platform,
-  Image,  
+  Image,
   SafeAreaView,
   Animated,
 } from "react-native";
@@ -19,6 +19,10 @@ import { API_KEY, Google_API_KEY, LOCAL_IP_ADDRESS } from "../keys/config";
 import * as MediaLibrary from "expo-media-library";
 import Waveform from "../components/waveform";
 import RenameModal from "../components/rename_file";
+import { useNavigation } from "expo-router";
+
+import Back_icon from "../assets/images/caret-left-solid.svg";
+import { ScrollView } from "react-native";
 
 const openai = new OpenAI({
   apiKey: API_KEY,
@@ -35,20 +39,19 @@ const configureAudio = async () => {
       interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
     });
 
-
-Audio.setAudioModeAsync({
-  allowsRecordingIOS: true,
-  interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-  playsInSilentModeIOS: true,
-  shouldDuckAndroid: true,
-  interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-  playThroughEarpieceAndroid: true,
-});
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+      playThroughEarpieceAndroid: true,
+    });
 
     console.log("Audio mode configured successfully.");
   } catch (error) {
     console.error("Error configuring audio mode:", error);
-    throw error; 
+    throw error;
   }
 };
 
@@ -57,13 +60,10 @@ configureAudio();
 export default function App() {
   const [recordingVar, setRecordingVar] = useState(null);
   const [sound, setSound] = useState(null);
-  const [gainValue, setGainValue] = useState(1);
   const [uri, setUri] = useState("");
-  const [generatedResponse, setGeneratedResponse] = useState("");
+  const [generatedSummary, setGeneratedSummary] = useState("");
   const [transcription, setTranscription] = useState("");
-  const [fileData, setFileData] = useState("");
-  const [userMessage, setUserMessage] = useState("");
-  const [chatHistory, setChatHistory] = useState([]);
+  const [wordTimeMapping, setWordTimeMapping] = useState({});
   const [waveform, setWaveform] = useState(new Array(40).fill(0));
   const [isRenameVisible, setIsRenameVisible] = useState(false);
   const [filename, setFilename] = useState("");
@@ -71,7 +71,6 @@ export default function App() {
 
   useEffect(() => {
     getPermissions();
-    fetchTranscription();
   }, []);
 
   const getPermissions = async () => {
@@ -84,19 +83,6 @@ export default function App() {
         "Permissions Denied",
         "This app requires microphone and storage permissions to function correctly.",
         [{ text: "OK" }]
-      );
-    }
-  };
-
-  const fetchTranscription = async () => {
-    try {
-      const response = await axios.get(`http://${LOCAL_IP_ADDRESS}:8080/file`);
-      setFileData(response.data);
-    } catch (error) {
-      console.error("Error fetching transcription:", error);
-      Alert.alert(
-        "Fetch Failed",
-        "An error occurred while trying to fetch the transcription."
       );
     }
   };
@@ -132,25 +118,16 @@ export default function App() {
         },
       };
 
-        console.log("Configuring audio...");
-        await configureAudio();
+      console.log("Configuring audio...");
+      await configureAudio();
 
       const { recording } = await Audio.Recording.createAsync(recordingOptions);
       console.log("Recording started");
       setRecordingVar(recording);
-      setIsRecording(true);
     } catch (err) {
       console.error("Failed to start recording", err);
     }
   }
-
-  const ensureDirExists = async (dir) => {
-    const dirInfo = await FileSystem.getInfoAsync(dir);
-    if (!dirInfo.exists) {
-      console.log("Directory does not exist, creating...");
-      await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
-    }
-  };
 
   const stopRecording = async () => {
     try {
@@ -159,9 +136,10 @@ export default function App() {
       const uri = recordingVar.getURI();
       setUri(uri);
       console.log("Recording stopped and stored");
-      console.log('uri', uri);
+      console.log("uri", uri);
       console.log("Transcribing audio...");
 
+      // ____________________________ TRANSCRIPTION LOGIC START ______________________________________
       const formData = new FormData();
       formData.append("audio", {
         uri,
@@ -170,64 +148,28 @@ export default function App() {
       });
 
       const headers = {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${API_KEY}`
-      }
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${API_KEY}`,
+      };
 
       try {
-        const response = await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/transcribe`, formData, { headers: headers });
+        const response = await axios.post(
+          `http://${LOCAL_IP_ADDRESS}:8080/transcribe`,
+          formData,
+          { headers: headers }
+        );
+
+        setTranscription(response.data.transcription);
+        setWordTimeMapping(response.data.wordTimeMapping);
+        setGeneratedSummary(response.data.summary);
+        setFilename(response.data.title); // generated file name
         console.log("Transcription response:", response.data);
-        const transcription = response.data.transcription;
-        const summary = response.data.summary;
-        const title = response.data.title;
-        setFileData(transcription);
-        setGeneratedResponse(summary);
-        console.log("Transcription:", transcription);
-        console.log("Summary:", summary); 
-        console.log("AudioNote Autogen Title:", title);
       } catch (error) {
         console.error("Error during transcription:", error);
       }
 
-      // setting the default file name
-      const folder_name = `recording_${new Date().getTime()}`;
+      // ____________________________ TRANSCRIPTION LOGIC END ______________________________________
 
-      // creating the directory
-      const recordingDir = `${FileSystem.documentDirectory}recordings/${folder_name}`;
-      await FileSystem.makeDirectoryAsync(recordingDir, {
-        intermediates: true,
-      });
-
-      // saving the audio file in the directory
-      const fileURI = Platform.OS === "ios" ? `${recordingDir}/recording.wav` : `${recordingDir}/recording.m4a`;
-      await FileSystem.moveAsync({ from: uri, to: fileURI });
-      console.log("Recording saved to:", fileURI);
-      const fileInfo = await FileSystem.getInfoAsync(fileURI);
-      console.log("File info:", fileInfo);
-
-      // saving the transcription in a file
-      // const transcriptionFile = `${recordingDir}/transcription.txt`;
-      // await FileSystem.writeAsStringAsync(transcriptionFile, transcription);
-      // console.log("Transcription saved to:", transcriptionFile);
-
-      // //saving the metadata in a file
-      // const metadataFile = `${recordingDir}/metadata.txt`;
-      // const recordingLengthSeconds = recordingVar.getDurationMillis() / 1000;
-      // const metadata = `Recording Date: ${new Date().toLocaleDateString()}\nRecording Length: ${recordingLengthSeconds} seconds`;
-      // await FileSystem.writeAsStringAsync(metadataFile, metadata);
-      // console.log("Metadata saved to:", metadataFile);
-
-      // saving the summary in a file
-
-      // saving the word-time-mapping
-      // const wordTimeMappingFile = `${recordingDir}/word_time_mapping.json`;
-      // await FileSystem.writeAsStringAsync(
-      //   wordTimeMappingFile,
-      //   JSON.stringify(wordTimeMapping)
-      // );
-      // console.log("Word-time mapping saved to:", wordTimeMappingFile);
-
-      setUri(fileURI);
       setRecordingVar(null);
       setIsRecording(false);
     } catch (err) {
@@ -237,128 +179,66 @@ export default function App() {
 
   // _________________________________ RECORDING LOGIC END ______________________________________
 
-  async function playRecording() {
+  const handleSave = async () => {
     try {
-      if (uri) {
-        console.log("Loading sound from", uri);
-        const { sound } = await Audio.Sound.createAsync({ uri });
-        setSound(sound);
+      //creating the directory
+      const recordingDir = `${FileSystem.documentDirectory}recordings/${filename}`;
+      await FileSystem.makeDirectoryAsync(recordingDir, {
+        intermediates: true,
+      });
 
-        console.log("Playing sound...");
-        await sound.playAsync();
-      } else {
-        console.log("No URI set for the recording.");
-      }
-    } catch (err) {
-      console.error("Failed to play recording", err);
-    }
-  }
+      // saving the audio file in the directory
+      const fileURI =
+        Platform.OS === "ios"
+          ? `${recordingDir}/recording.wav`
+          : `${recordingDir}/recording.m4a`;
+      await FileSystem.moveAsync({ from: uri, to: fileURI });
+      console.log("Recording saved to:", fileURI);
 
-  async function shareRecording() {
-    try {
-      if (uri) {
-        await Sharing.shareAsync(uri);
-      } else {
-        Alert.alert(
-          "No Recording",
-          "There is no recording available to share."
-        );
-      }
-    } catch (err) {
-      console.error("Failed to share recording", err);
-      Alert.alert(
-        "Share Failed",
-        "An error occurred while trying to share the recording."
+      // saving the transcription in a file
+      console.log("Transcription:", transcription);
+      const transcriptionFile = `${recordingDir}/transcription.txt`;
+      await FileSystem.writeAsStringAsync(transcriptionFile, transcription);
+      console.log("Transcription saved to:", transcriptionFile);
+
+      //saving the metadata in a file
+      const metadataFile = `${recordingDir}/metadata.json`;
+      const recordingLengthSeconds = progress;
+      const metadata = {
+        recordingDate: new Date().toLocaleDateString(),
+        recordingLength: `${recordingLengthSeconds} seconds`,
+      };
+      console.log("Metadata:", metadata);
+      await FileSystem.writeAsStringAsync(
+        metadataFile,
+        JSON.stringify(metadata)
       );
+      console.log("Metadata saved to:", metadataFile);
+
+      // saving the summary in a file
+      console.log("Summary:", generatedSummary);
+      const summaryFile = `${recordingDir}/summary.txt`;
+      await FileSystem.writeAsStringAsync(summaryFile, generatedSummary);
+      console.log("Summary saved to:", summaryFile);
+
+      // saving the word-time-mapping
+      console.log("Word-time mapping:", wordTimeMapping);
+      const wordTimeMappingFile = `${recordingDir}/word_time_mapping.json`;
+      await FileSystem.writeAsStringAsync(
+        wordTimeMappingFile,
+        JSON.stringify(wordTimeMapping)
+      );
+      console.log("Word-time mapping saved to:", wordTimeMappingFile);
+    } catch (error) {
+      console.error("Error saving recording:", error);
     }
-  }
+  };
 
   const handleResetFile = async () => {
-    try {
-      await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/resetTranscriptionFile`);
-      setFileData("");
-      setGeneratedResponse("");
-    } catch (error) {
-      console.error("Error resetting transcription file:", error);
-      alert("Error resetting transcription file. Please try again.");
-    }
+    setGeneratedResponse("");
+    setTranscription({});
+    setGeneratedSummary("");
   };
-
-  //Summariser for general notes
-  const generateResponseNote = async (Transcription) => {
-    try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [{role:'system', content:'You are a summarizing tool for general audio-notes that a person might make at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
-      });
-
-      console.log("Generated response:", response.choices[0].message.content);
-      setGeneratedResponse(response.choices[0].message.content);
-    } catch (error) {
-      console.error("Failed to generate response:", error);
-      Alert.alert(
-        "Response Generation Failed",
-        "An error occurred while trying to generate the response."
-      );
-    }
-  };
-
-  //Summariser for lectures
-  const generateResponseLecture = async (Transcription) => {
-    try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [{role:'system', content:'You are a summarizing tool for university lectures that a person might record for any class/subject/course or level of study. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
-      });
-
-      console.log("Generated response:", response.choices[0].message.content);
-      setGeneratedResponse(response.choices[0].message.content);
-    } catch (error) {
-      console.error("Failed to generate response:", error);
-      Alert.alert(
-        "Response Generation Failed",
-        "An error occurred while trying to generate the response."
-      );
-    }
-  };
-
-  //Summariser for discussions
-  const generateResponseDiscussion = async (Transcription) => {
-    try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [{role:'system', content:'You are a summarizing tool for general discussions about anything that a person might have with anyone at any one or multiple people. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
-      });
-
-      console.log("Generated response:", response.choices[0].message.content);
-      setGeneratedResponse(response.choices[0].message.content);
-    } catch (error) {
-      console.error("Failed to generate response:", error);
-      Alert.alert(
-        "Response Generation Failed",
-        "An error occurred while trying to generate the response."
-      );
-    }
-  };
-
-  //Summariser for meetings
-  const generateResponseMeeting = async (Transcription) => {
-    try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [{role:'system', content:'You are a summarizing tool for formal or informal meetings that a person might record at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
-      });
-
-      console.log("Generated response:", response.choices[0].message.content);
-      setGeneratedResponse(response.choices[0].message.content);
-    } catch (error) {
-      console.error("Failed to generate response:", error);
-      Alert.alert(
-        "Response Generation Failed",
-        "An error occurred while trying to generate the response."
-      );
-    }
-  }
 
   const updateWaveform = async () => {
     const newWaveform = generateMockWaveform(40);
@@ -399,6 +279,7 @@ export default function App() {
     const initializeRecording = async () => {
       console.log("Initializing recording...");
       handleResetFile();
+      setIsRecording(true);
       startRecording();
     };
 
@@ -439,18 +320,25 @@ export default function App() {
     await stopRecording();
   };
 
-  const handleSave = (newFileUri) => {
-    setUri(newFileUri);
-    isRenameVisible(false);
+  const navigation = useNavigation();
+
+  const handleDelete = async () => {
+    handleResetFile();
+    setRecordingVar(null);
     navigation.navigate("home");
+  };
+
+  const handleShowTranscription = async () => {
+    console.log("triggered show transcription");
   };
 
   return isRecording ? (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1, alignContent: "center", justifyContent: "center" }}>
+      <View
+        style={{ flex: 1, alignContent: "center", justifyContent: "center" }}
+      >
         <Waveform waveform={waveform} />
       </View>
-      <Text>{fileData}</Text>
       <View
         style={{
           flex: 1,
@@ -515,12 +403,81 @@ export default function App() {
     </SafeAreaView>
   ) : (
     <SafeAreaView style={{ flex: 1 }}>
-      {/* <RenameModal
-        visible={isRenameVisible}
-        onClose={() => setIsRenameVisible(false)}
-        onSave={handleSave}
-        fileUri={uri}
-      /> */}
+      <View style={{ position: 'absolute', top: '5%', left: "5%" }}>
+        <TouchableOpacity onPress={handleDelete}>
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: 'black',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Back_icon height="20" width="20" fill="white" />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ flex: 1, marginHorizontal: '5%', marginTop: '25%' }}>
+        <Text
+          style={{
+            fontFamily: 'IBMPlexMono-SemiBold',
+            color: 'black',
+            fontSize: 30,
+            textAlign: 'center',
+            marginBottom: '7%',
+          }}
+        >
+          {filename}
+        </Text>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <Text
+            style={{
+              fontFamily: 'IBMPlexMono-Regular',
+              color: 'grey',
+              fontSize: 16,
+              flex: 1,
+            }}
+          >
+            {generatedSummary}
+          </Text>
+        </ScrollView>
+      </View>
+      
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginHorizontal: '5%',
+          marginBottom: '2%',
+        }}
+      >
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <TouchableOpacity onPress={handleSave}>
+            <Image
+              source={require('../assets/images/blob_1.gif')}
+              style={{ width: 110, height: 110 }}
+              resizeMode="contain"
+            />
+            <Text
+              style={{
+                fontFamily: 'IBMPlexMono-Regular',
+                position: 'absolute',
+                top: '37%',
+                left: '10%',
+                color: 'white',
+                fontSize: 16,
+              }}
+            >
+              Save
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </SafeAreaView>
   );
-}
+};
