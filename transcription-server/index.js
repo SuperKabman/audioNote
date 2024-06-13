@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 const axios = require("axios");
-const FormData = require('form-data');
+const FormData = require("form-data");
 const cors = require("cors");
 const { exec } = require("child_process");
 const app = express();
@@ -14,17 +14,8 @@ const upload = multer({ dest: "uploads/" });
 app.use(cors());
 app.use(express.json());
 
-const transcriptionFilePath = path.join(
-  __dirname,
-  "./transcriptionFile(s)",
-  "transcription.txt"
-);
-
-const wordTimeMappingFilePath = path.join(
-  __dirname,
-  "./transcriptionFile(s)",
-  "word_time_mapping.json"
-);
+const transcriptionFilePath = path.join(__dirname, "./transcriptionFile(s)", "transcription.txt");
+const wordTimeMappingFilePath = path.join(__dirname, "./transcriptionFile(s)", "word_time_mapping.json");
 
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   try {
@@ -33,46 +24,108 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
     }
 
     const filePath = req.file.path;
-    const convertedFilePath = path.join(__dirname, "uploads", "converted.mp3");
+    const fileType = req.file.mimetype;
 
-    // Convert WAV to MP3 using ffmpeg
-    await convertToMP3(filePath, convertedFilePath);
+    console.log("Uploaded file type:", fileType);
 
-    // Create form data for the OpenAI API
-    const formData = new FormData();
-    formData.append("file", fs.createReadStream(convertedFilePath));
-    formData.append("model", "whisper-1");
-    formData.append("language", "en-US"); 
-    formData.append("response_format", "verbose_json"); 
-    formData.append("timestamp_granularity", ["word"]);  
-
-    const headers = {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      ...formData.getHeaders(),
-    };
-
-    // Make the request to the OpenAI API
-    const response = await axios.post(
-      "https://api.openai.com/v1/audio/transcriptions",
-      formData,
-      { headers: headers }
-    );
-
-    // Delete the files after processing
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error("Error deleting file:", err);
+    // Check if the uploaded file is a WAV file (audio/vnd.wave)
+    if (fileType === "audio/vnd.wave") {
+      const convertedFilePath = path.join(__dirname, "uploads", "converted.mp3");
+        console.log('Converted file path:', convertedFilePath);
+        console.log('api key:', process.env.OPENAI_API_KEY);
+      try {
+        await convertToMP3(filePath, convertedFilePath);
+        
+      } catch (error) {
+        console.error("Error converting file to MP3:", error.message);
+        return res.status(500).send({ error: "Failed to convert file to MP3" });
       }
-    });
-    fs.unlink(convertedFilePath, (err) => {
-      if (err) {
-        console.error("Error deleting converted file:", err);
-      }
-    });
 
-    res.send(response.data);
+      
+
+      // Use the converted MP3 file for transcription
+      const formData = new FormData();
+formData.append("file", fs.createReadStream(convertedFilePath));
+formData.append('model', "whisper-1");
+
+
+const headers = {
+  Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+  ...formData.getHeaders(),
+};
+
+console.log("Headers:", headers);
+console.log("FormData:", formData);
+
+try {
+  const response = await axios.post(
+    "https://api.openai.com/v1/audio/transcriptions",
+    formData,
+    { headers }
+  );
+
+  console.log("API response:", response.data);
+
+  const transcription = response.data.transcription;
+
+  res.send({ transcription });
+} catch (error) {
+  console.error("Error making API request:", error);
+  console.error("API response data:", error.response.data);
+  res.status(500).send({ error: "Error transcribing audio" });
+}
+
+
+      // Clean up: delete uploaded and converted files
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error("Error deleting file:", err);
+        }
+      });
+      fs.unlink(convertedFilePath, (err) => {
+        if (err) {
+          console.error("Error deleting converted file:", err);
+        }
+      });
+    } else {
+      // For other supported file types, proceed directly to transcription
+      const formData = new FormData();
+      formData.append("file", fs.createReadStream(filePath));
+      formData.append("model", "whisper-1");
+      formData.append("language", "en-US");
+
+      const headers = {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        ...formData.getHeaders(),
+      };
+
+      try {
+        const response = await axios.post(
+          "https://api.openai.com/v1/audio/transcriptions",
+          formData,
+          { headers: headers }
+        );
+
+        console.log("API response:", response.data);
+
+        const transcription = response.data.transcription;
+
+        res.send({ transcription: transcription });
+      } catch (error) {
+        console.error("Error making API request:", error);
+        console.error("API response data:", error.response.data);
+        res.status(500).send({ error: "Error transcribing audio" });
+      }
+
+      // Clean up: delete uploaded file
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error("Error deleting file:", err);
+        }
+      });
+    }
   } catch (error) {
-    console.error("Error during transcription:", error.response ? error.response.data : error.message);
+    console.error("Error during transcription:", error.message);
     res.status(500).send({ error: "Error during transcription" });
   }
 });
@@ -84,7 +137,8 @@ async function convertToMP3(inputFile, outputFile) {
     exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error("Error converting file:", error);
-        reject(error);
+        console.error("FFmpeg stderr:", stderr);
+        reject(new Error("Failed to convert file. Please check the file format and try again."));
       } else {
         console.log("File converted successfully");
         resolve();
@@ -122,9 +176,7 @@ app.post("/find-sentence", (req, res) => {
   }
 
   try {
-    const wordTimeMapping = JSON.parse(
-      fs.readFileSync(wordTimeMappingFilePath)
-    );
+    const wordTimeMapping = JSON.parse(fs.readFileSync(wordTimeMappingFilePath));
     const words = sentence.split(" ");
 
     let startTime = null;
@@ -132,9 +184,7 @@ app.post("/find-sentence", (req, res) => {
     let wordIndex = 0;
 
     for (let i = 0; i < wordTimeMapping.length; i++) {
-      if (
-        wordTimeMapping[i].word.toLowerCase() === words[wordIndex].toLowerCase()
-      ) { 
+      if (wordTimeMapping[i].word.toLowerCase() === words[wordIndex].toLowerCase()) {
         if (wordIndex === 0) {
           startTime = wordTimeMapping[i].startTime;
         }

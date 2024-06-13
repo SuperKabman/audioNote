@@ -6,7 +6,7 @@ import {
   Text,
   Alert,
   Platform,
-  Image,
+  Image,  
   SafeAreaView,
   Animated,
 } from "react-native";
@@ -23,6 +23,36 @@ import RenameModal from "../components/rename_file";
 const openai = new OpenAI({
   apiKey: API_KEY,
 });
+
+const configureAudio = async () => {
+  try {
+    console.log("Setting audio mode with the following configuration:");
+    console.log({
+      allowsRecordingIOS: true,
+      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
+    });
+
+
+Audio.setAudioModeAsync({
+  allowsRecordingIOS: true,
+  interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+  playsInSilentModeIOS: true,
+  shouldDuckAndroid: true,
+  interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+  playThroughEarpieceAndroid: true,
+});
+
+    console.log("Audio mode configured successfully.");
+  } catch (error) {
+    console.error("Error configuring audio mode:", error);
+    throw error; 
+  }
+};
+
+configureAudio();
 
 export default function App() {
   const [recordingVar, setRecordingVar] = useState(null);
@@ -102,6 +132,9 @@ export default function App() {
         },
       };
 
+        console.log("Configuring audio...");
+        await configureAudio();
+
       const { recording } = await Audio.Recording.createAsync(recordingOptions);
       console.log("Recording started");
       setRecordingVar(recording);
@@ -124,19 +157,10 @@ export default function App() {
       console.log("Stopping recording...");
       await recordingVar.stopAndUnloadAsync();
       const uri = recordingVar.getURI();
+      setUri(uri);
       console.log("Recording stopped and stored");
       console.log('uri', uri);
       console.log("Transcribing audio...");
-      // const formData = new FormData();
-      // formData.append("audio", {
-      //   uri: uri,
-      //   type: Platform.OS === "ios" ? "audio/wav" : "audio/m4a",
-      //   name: Platform.OS === "ios" ? "recording.caf" : "recording.m4a",
-      // });
-
-      // const response = await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/transcribeFromFile`, {
-      //   filePath: uri,
-      // });
 
       const formData = new FormData();
       formData.append("audio", {
@@ -146,20 +170,20 @@ export default function App() {
       });
 
       const headers = {
-        'Content-Type': 'multipart/form',
-        'Authorization': `Bearer ${API_KEY}`
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${API_KEY}`
       }
 
-      const response = await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/transcribe`, formData, { headers: headers });
-      console.log("Transcription response:", response.data);
+      try {
+        const response = await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/transcribe`, formData, { headers: headers });
+        console.log("Transcription response:", response.data);
 
-      const transcription = response.data.transcription;
-      
-      setFileData(transcription);
-      console.log("Transcription:", transcription);
-      // const wordTimeMapping = await axios.post(
-      //   `http://${LOCAL_IP_ADDRESS}:8080/getWordTimeMapping`
-      // );
+        const transcription = response.data.transcription;
+        setFileData(transcription);
+        console.log("Transcription:", transcription);
+      } catch (error) {
+        console.error("Error during transcription:", error);
+      }
 
       // setting the default file name
       const folder_name = `recording_${new Date().getTime()}`;
@@ -169,8 +193,6 @@ export default function App() {
       await FileSystem.makeDirectoryAsync(recordingDir, {
         intermediates: true,
       });
-
-  
 
       // saving the audio file in the directory
       const fileURI = Platform.OS === "ios" ? `${recordingDir}/recording.wav` : `${recordingDir}/recording.m4a`;
