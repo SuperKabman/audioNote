@@ -31,7 +31,22 @@ const generateResponseNote = async (Transcription) => {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: [{role:'system', content:'You are a summarizing tool for general audio-notes that a person might make at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
+      messages: [{role:'system', content:'You are a summarizing tool for general audio-notes that a person might make at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio. And remember that you have to talk in a way that you are talking to the user, because that is who you interact with, that is who you help. You will always address the transcription as "the conversation".'},{ role: "user", content:Transcription }],
+    });
+
+    console.log("Generated response:", response.choices[0].message.content);
+    return response.choices[0].message.content; 
+  } catch (error) {
+    console.error("Failed to generate response:", error);
+    
+  }
+};
+
+const generateTitle = async (Summary) => {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{role:'system', content:"You are a title generating bot. Your prompts are summaries of lectures/audionotes/meetings/discussions etc. You have to give a title to those summaries (essentially the notes) in 4 words or less."},{ role: "user", content:Summary }],
     });
 
     console.log("Generated response:", response.choices[0].message.content);
@@ -101,8 +116,14 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
           console.error("Error generating summary:", error);
           return res.status(500).send({ error: "Error generating summary" });
         }
+    try {
+      title = await generateTitle(summary);
+        } catch (error) {
+          console.error("Error generating title:", error);
+          return res.status(500).send({ error: "Error generating title" });
+    }
 
-        res.send({ transcription:transcription, summary:summary });
+        res.send({ transcription:transcription, summary:summary, title:title });
         } catch (error) {
         console.error("Error making API request:", error);
         console.error("API response data:", error.response.data);
@@ -168,6 +189,8 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
     res.status(500).send({ error: "Error during transcription" });
   }
 });
+
+
 
 async function convertToMP3(inputFile, outputFile) {
   return new Promise((resolve, reject) => {
@@ -257,3 +280,5 @@ app.post("/find-sentence", (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+

@@ -179,10 +179,12 @@ export default function App() {
         console.log("Transcription response:", response.data);
         const transcription = response.data.transcription;
         const summary = response.data.summary;
+        const title = response.data.title;
         setFileData(transcription);
         setGeneratedResponse(summary);
         console.log("Transcription:", transcription);
         console.log("Summary:", summary); 
+        console.log("AudioNote Autogen Title:", title);
       } catch (error) {
         console.error("Error during transcription:", error);
       }
