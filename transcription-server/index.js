@@ -10,6 +10,8 @@ const { exec } = require("child_process");
 const app = express();
 const port = process.env.PORT || 8080;
 const upload = multer({ dest: "uploads/" });
+const OpenAI  = require('openai');
+const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
 app.use(cors());
 app.use(express.json());
@@ -24,6 +26,21 @@ const wordTimeMappingFilePath = path.join(
   "./transcriptionFile(s)",
   "word_time_mapping.json"
 );
+
+const generateResponseNote = async (Transcription) => {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{role:'system', content:'You are a summarizing tool for general audio-notes that a person might make at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.'},{ role: "user", content:Transcription }],
+    });
+
+    console.log("Generated response:", response.choices[0].message.content);
+    return response.choices[0].message.content; 
+  } catch (error) {
+    console.error("Failed to generate response:", error);
+    
+  }
+};
 
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
   try {
@@ -56,6 +73,7 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
       const formData = new FormData();
       formData.append("file", fs.createReadStream(convertedFilePath));
       formData.append("model", "whisper-1");
+      formData.append("language", "en"); 
 
       const headers = {
         Authorization: `Bearer sk-proj-mwk4p3idrv3rzkJtElxFT3BlbkFJVjp4tnLPFWBuY5lj02qK`,
@@ -76,13 +94,20 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 
         const transcription = response.data.text;
 
-        res.send({ transcription });
-      } catch (error) {
+        let summary;
+    try {
+      summary = await generateResponseNote(transcription);
+        } catch (error) {
+          console.error("Error generating summary:", error);
+          return res.status(500).send({ error: "Error generating summary" });
+        }
+
+        res.send({ transcription:transcription, summary:summary });
+        } catch (error) {
         console.error("Error making API request:", error);
         console.error("API response data:", error.response.data);
         res.status(500).send({ error: "Error transcribing audio" });
-      }
-
+        }
       // Clean up: delete uploaded and converted files
       fs.unlink(filePath, (err) => {
         if (err) {
@@ -99,7 +124,7 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
       const formData = new FormData();
       formData.append("file", fs.createReadStream(filePath));
       formData.append("model", "whisper-1");
-      formData.append("language", "en-US");
+      formData.append("language", "en");
 
       const headers = {
         Authorization: `Bearer sk-proj-mwk4p3idrv3rzkJtElxFT3BlbkFJVjp4tnLPFWBuY5lj02qK`,
@@ -117,13 +142,20 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 
         const transcription = response.data.transcription;
 
-        res.send({ transcription: transcription });
-      } catch (error) {
+        let summary;
+    try {
+      summary = await generateResponseNote(transcription);
+        } catch (error) {
+          console.error("Error generating summary:", error);
+          return res.status(500).send({ error: "Error generating summary" });
+        }
+
+        res.send({ transcription:transcription, summary:summary });
+        } catch (error) {
         console.error("Error making API request:", error);
         console.error("API response data:", error.response.data);
         res.status(500).send({ error: "Error transcribing audio" });
-      }
-
+        }
       // Clean up: delete uploaded file
       fs.unlink(filePath, (err) => {
         if (err) {

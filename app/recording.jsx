@@ -177,10 +177,12 @@ export default function App() {
       try {
         const response = await axios.post(`http://${LOCAL_IP_ADDRESS}:8080/transcribe`, formData, { headers: headers });
         console.log("Transcription response:", response.data);
-
         const transcription = response.data.transcription;
+        const summary = response.data.summary;
         setFileData(transcription);
+        setGeneratedResponse(summary);
         console.log("Transcription:", transcription);
+        console.log("Summary:", summary); 
       } catch (error) {
         console.error("Error during transcription:", error);
       }
