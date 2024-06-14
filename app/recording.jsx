@@ -260,6 +260,18 @@ export default function App() {
     return points;
   };
 
+  const openRenameModal = () => {
+    setIsRenameVisible(true);
+  };
+
+  const closeRenameModal = () => {
+    setIsRenameVisible(false);
+  };
+
+  const handleRenameSave = (newName) => {
+    setFilename(newName);
+  };
+
   useEffect(() => {
     if (recordingVar) {
       Audio.setAudioModeAsync({
@@ -333,10 +345,6 @@ export default function App() {
     handleResetFile();
     setRecordingVar(null);
     navigation.navigate("home");
-  };
-
-  const handleShowTranscription = async () => {
-    console.log("triggered show transcription");
   };
 
   return isRecording ? (
@@ -428,17 +436,19 @@ export default function App() {
       </View>
 
       <View style={{ flex: 1, marginHorizontal: '5%', marginTop: '25%' }}>
-        <Text
-          style={{
-            fontFamily: 'IBMPlexMono-SemiBold',
-            color: 'black',
-            fontSize: 30,
-            textAlign: 'center',
-            marginBottom: '7%',
-          }}
-        >
-          {filename}
-        </Text>
+        <TouchableOpacity onPress={openRenameModal}>
+          <Text
+            style={{
+              fontFamily: 'IBMPlexMono-SemiBold',
+              color: 'black',
+              fontSize: 30,
+              textAlign: 'center',
+              marginBottom: '7%',
+            }}
+          >
+            {filename}
+          </Text>
+        </TouchableOpacity>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <Text
             style={{
@@ -485,6 +495,12 @@ export default function App() {
           </TouchableOpacity>
         </View>
       </View>
+      <RenameModal
+        visible={isRenameVisible}
+        onClose={closeRenameModal}
+        onSave={handleRenameSave}
+        currentName={filename}
+      />
     </SafeAreaView>
   );
 };

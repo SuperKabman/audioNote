@@ -1,50 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Modal, StyleSheet } from 'react-native';
-import * as FileSystem from 'expo-file-system';
+import React, { useState } from "react";
+import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 
-const RenameModal = ({ visible, onClose, onSave, fileUri }) => {
-  const [newFileName, setNewFileName] = useState('');
+const RenameModal = ({ visible, onClose, onSave, currentName }) => {
+  const [newName, setNewName] = useState(currentName);
 
-  const ensureDirExists = async (dir) => {
-    const dirInfo = await FileSystem.getInfoAsync(dir);
-    if (!dirInfo.exists) {
-      console.log('Directory does not exist, creating...');
-      await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
-    }
+  const handleSave = () => {
+    onSave(newName);
+    onClose();
   };
-
-  const handleSave = async () => {
-    const fileExtension = fileUri.split('.').pop();
-    const newFileUri = `${FileSystem.documentDirectory}${newFileName}.${fileExtension}`;
-    
-    try {
-        await ensureDirExists(newFileUri);
-  
-        await FileSystem.moveAsync({
-          from: fileUri,
-          to: newFileUri,
-        });
-        onSave(newFileUri);
-      } catch (error) {
-        console.error('Failed to rename file:', error);
-        Alert.alert('Error', 'Failed to rename the file.');
-      }
-    };
-  
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
-      <View style={styles.modalContainer}>
+      <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <Text>Rename Recording</Text>
+          <Text style={styles.modalTitle}>Rename File</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Enter new file name"
-            value={newFileName}
-            onChangeText={setNewFileName}
+            style={styles.textInput}
+            value={newName}
+            onChangeText={setNewName}
           />
-          <Button title="Save" onPress={handleSave} />
-          <Button title="Cancel" onPress={onClose} />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity onPress={onClose} style={styles.button}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSave} style={styles.button}>
+              <Text style={styles.buttonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -52,24 +34,45 @@ const RenameModal = ({ visible, onClose, onSave, fileUri }) => {
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
-    width: '80%',
+    width: 300,
     padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  input: {
-    width: '100%',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 10,
+  },
+  textInput: {
+    width: "100%",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    marginBottom: 20,
+    paddingHorizontal: 5,
+    paddingVertical: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  button: {
+    flex: 1,
+    padding: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 16,
+    color: "#007BFF",
   },
 });
 
