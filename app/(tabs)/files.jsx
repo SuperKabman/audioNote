@@ -18,6 +18,7 @@ import JSZip from "jszip";
 const Files = () => {
   const [directories, setDirectories] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -60,8 +61,10 @@ const Files = () => {
   };
 
   const handleDirectoryClick = (path) => {
-    navigation.navigate("file_details", { path });
-    console.log(`Directory ${path} clicked`);
+    if (!isSelectionMode) {
+      navigation.navigate("file_details", { path });
+      console.log(`Directory ${path} clicked`);
+    }
   };
 
   const handleLongPress = (directory) => {
@@ -72,6 +75,21 @@ const Files = () => {
         return [...prevSelectedItems, directory.path];
       }
     });
+    setIsSelectionMode(true);
+  };
+
+  const handleTapSelect = (directory) => {
+    if (isSelectionMode) {
+      setSelectedItems((prevSelectedItems) => {
+        if (prevSelectedItems.includes(directory.path)) {
+          return prevSelectedItems.filter(item => item !== directory.path);
+        } else {
+          return [...prevSelectedItems, directory.path];
+        }
+      });
+    } else {
+      handleDirectoryClick(directory.path);
+    }
   };
 
   const handleMenuDelete = async () => {
@@ -84,22 +102,33 @@ const Files = () => {
       }
     }
     setSelectedItems([]);
+    setIsSelectionMode(false);
     listDirectories(); // Refresh the list of directories
   };
 
   const handleMenuShare = async () => {
     try {
-      const zip = new JSZip();
+      const tempDir = FileSystem.cacheDirectory + "temp_share/";
+      await FileSystem.makeDirectoryAsync(tempDir, { intermediates: true });
 
       for (const directoryPath of selectedItems) {
         const items = await FileSystem.readDirectoryAsync(directoryPath);
         for (const item of items) {
           if (item.endsWith('.m4a') || item.endsWith('.wav') || item === 'summary.txt') {
             const itemPath = `${directoryPath}/${item}`;
-            const fileContent = await FileSystem.readAsStringAsync(itemPath, { encoding: FileSystem.EncodingType.Base64 });
-            zip.file(item, fileContent, { base64: true });
+            const newFileName = `${directoryPath.split('/').pop()}_${item}`;
+            const newFilePath = `${tempDir}/${newFileName}`;
+            await FileSystem.copyAsync({ from: itemPath, to: newFilePath });
           }
         }
+      }
+
+      const zip = new JSZip();
+      const tempItems = await FileSystem.readDirectoryAsync(tempDir);
+      for (const item of tempItems) {
+        const itemPath = `${tempDir}/${item}`;
+        const fileContent = await FileSystem.readAsStringAsync(itemPath, { encoding: FileSystem.EncodingType.Base64 });
+        zip.file(item, fileContent, { base64: true });
       }
 
       const zipContent = await zip.generateAsync({ type: 'base64' });
@@ -110,11 +139,17 @@ const Files = () => {
 
       // Cleanup
       await FileSystem.deleteAsync(tempZipPath, { idempotent: true });
+      await FileSystem.deleteAsync(tempDir, { idempotent: true });
     } catch (error) {
       console.error(`Failed to share files`, error);
     }
     setSelectedItems([]);
+    setIsSelectionMode(false);
   };
+
+  useEffect(() => {
+    listDirectories();
+  }, []);
 
   useEffect(() => {
     listDirectories();
@@ -132,7 +167,6 @@ const Files = () => {
                 </MenuTrigger>
                 <MenuOptions>
                   <MenuOption onSelect={handleMenuDelete} text='Delete' />
-                  <MenuOption onSelect={() => alert(`Rename`)} text='Rename' />
                   <MenuOption onSelect={handleMenuShare} text='Share' />
                 </MenuOptions>
               </Menu>
@@ -144,7 +178,7 @@ const Files = () => {
                   styles.buttonContainer,
                   selectedItems.includes(directory.path) && styles.selectedButtonContainer
                 ]}
-                onPress={() => handleDirectoryClick(directory.path)}
+                onPress={() => handleTapSelect(directory)}
                 onLongPress={() => handleLongPress(directory)}
                 delayLongPress={200}
               >
