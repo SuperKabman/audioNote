@@ -23,6 +23,7 @@ import { useNavigation } from "expo-router";
 
 import Back_icon from "../assets/images/caret-left-solid.svg";
 import { ScrollView } from "react-native";
+import { KeyboardAvoidingView } from "react-native";
 
 const openai = new OpenAI({
   apiKey: API_KEY,
@@ -264,7 +265,7 @@ export default function App() {
       console.log("Word-time mapping saved to:", wordTimeMappingFile);
 
       handleBackButton();
-      
+
     } catch (error) {
       console.error("Error saving recording:", error);
       Alert.alert(
@@ -452,6 +453,10 @@ export default function App() {
       </View>
     </SafeAreaView>
   ) : (
+    <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={{ flex: 1 }}
+  >
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ position: 'absolute', top: '5%', left: "5%" }}>
         <TouchableOpacity onPress={handleBackButton}>
@@ -537,5 +542,6 @@ export default function App() {
         currentName={filename}
       />
     </SafeAreaView>
+  </KeyboardAvoidingView>
   );
 };

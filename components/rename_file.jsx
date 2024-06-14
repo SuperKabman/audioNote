@@ -43,22 +43,25 @@ const styles = StyleSheet.create({
   modalContent: {
     width: 300,
     padding: 20,
-    backgroundColor: "white",
+    backgroundColor: "black",
     borderRadius: 10,
     alignItems: "center",
   },
   modalTitle: {
+    fontFamily: "IBMPlexMono-SemiBold",
     fontSize: 18,
-    fontWeight: "bold",
     marginBottom: 10,
+    color: "white",
   },
   textInput: {
+    fontFamily: "IBMPlexMono-Regular",
     width: "100%",
     borderBottomWidth: 1,
     borderColor: "#ccc",
     marginBottom: 20,
     paddingHorizontal: 5,
     paddingVertical: 10,
+    color: "white",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -69,10 +72,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     alignItems: "center",
+    backgroundColor: "white",
+    marginHorizontal: 5,
+    borderRadius: 5,
   },
   buttonText: {
+    fontFamily: "IBMPlexMono-Medium",
     fontSize: 16,
-    color: "#007BFF",
+    color: "black",
   },
 });
 

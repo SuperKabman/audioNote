@@ -12,6 +12,7 @@ import "nativewind";
 import { icons } from "@/constants/icons";
 import Profile from "@/assets/images/profileSVG.svg";
 
+
 const Home = () => {
   const navigation = useNavigation();
   const handlePress = () => {
@@ -21,13 +22,16 @@ const Home = () => {
     navigation.navigate("profile");
   };
 
-  // ...
+  const handleLongPress = () => {
+    navigation.navigate("options");
+  }
 
 return (
   <SafeAreaView style={{ flex: 1 , backgroundColor:'#DADADA'}}>
     <SafeAreaView style={{ flex: 1 }}>
       <TouchableOpacity
         onPress={handlePress}
+        onLongPress={handleLongPress}
         style={{ alignItems: "center", justifyContent: "center",  marginTop:'60%', marginBottom:"60%", marginHorizontal:'20%' }}
       >
         <Image
