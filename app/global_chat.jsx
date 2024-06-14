@@ -68,7 +68,7 @@ const responseGeneration = async (userMessage) => {
   try {
     const completion = await openai.chat.completions.create({
       messages: [
-        { role: 'system', content: 'You are a chatbot in an app called AudioNote. This app is used to record audio-notes of conversations, discussions, meetings, lectures, etc. You have the responsibility to answer any questions from any of the audio-notes that the user has made in this app. In front of every line of audionotes context, there is the date and time present in square brackets. The date and time inside those square brackets is not content from the audionote otself, that is just for you to know that when an audionote was made by the user.' },
+        { role: 'system', content: 'You are a chatbot in an app called AudioNote. This app is used to record audio-notes of conversations, discussions, meetings, lectures, etc. You have the responsibility to answer any questions from any of the audio-notes that the user has made in this app. In front of every line of audionotes context, there is the date and time present in square brackets. The date and time inside those square brackets is not content from the audionote otself, that is just for you to know that when an audionote was made by the user. Dont talk about the audionotes unless you are asked about them, if you are not asked a question related to any information in the audionotes context, just behave like a normal assisstant in the audionotes app.' },
         { role: 'user', content: userMessage }
       ],
       model: "gpt-3.5-turbo",
@@ -144,14 +144,23 @@ const Chat = () => {
       >
         <Backbutton />
       </TouchableOpacity>
+      <KeyboardAvoidingView   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.inputContainer} >
       <ScrollView style={styles.messagesContainer}>
-        {messages.map((message, index) => (
-          <Text key={index} style={styles.message}>
-            {message.sender === "user" ? "You: " : "Bot: "}
-            {message.text}
+      {messages.length === 0 ? (
+          <Text style={styles.welcomeMessage}>
+            Hi, ask me anything from your audionotes and beyond.
           </Text>
-        ))}
+        ) : (
+          messages.map((message, index) => (
+            <Text key={index} style={message.sender === "user" ? styles.userMessage : styles.botMessage}>
+              {message.sender === "user" ? "You-> " : "Bot-> "}
+              {message.text}
+            </Text>
+          ))
+        )}
       </ScrollView>
+      </KeyboardAvoidingView>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.inputContainer} >
         <Image
@@ -163,6 +172,7 @@ const Chat = () => {
           onChangeText={setInput}
           style={styles.input}
           placeholder="Type your message"
+          placeholderTextColor="black"
         />
         <TouchableOpacity
           onPress={sendMessage}
@@ -182,6 +192,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "relative",
+  },
+  welcomeMessage: {
+    left: "0%",
+    fontSize: 25,
+    fontFamily: "IBMPlexMono-Medium",
+    marginBottom: 20,
+    color: "#A5A5A5",
+    textAlign: "center",
+    top: "-15%",
+    lineHeight: 60,
   },
   canvas: {
     position: "absolute",
@@ -203,16 +223,36 @@ const styles = StyleSheet.create({
   messagesContainer: {
     flex: 1,
     padding: 20,
-    marginTop: 90,
+    top:-5,
     marginBottom: 60,
     opacity: 20,
+    width: 100,
+    height: '90%',
+   
+    
   },
-  message: {
-    left: "2%",
+  userMessage: {
+    marginTop: 0,
+    left: "0%",
     fontSize: 18,
     fontFamily: "IBMPlexMono-Medium",
-    marginBottom: 10,
+    marginBottom: 20,
+    color: "#A5A5A5",
+    width: 350,
+    top: 0,
+    
+  },
+  botMessage: {
+    left: "0%",
+    fontSize: 18,
+    fontFamily: "IBMPlexMono-Medium",
+    marginBottom: 0,
     color: "white",
+    fontColor: "#A5A5A5", 
+    color: "white",
+    width: 350,
+    bottom: 10,
+    
   },
   inputContainer: {
     flexDirection: "row",
@@ -220,15 +260,18 @@ const styles = StyleSheet.create({
     padding: 10,
     position: "absolute",
     bottom: "2%",
-    width: "90%",
-    left: "5%",
+    width: "100%",
+    left: "0%",
+    
+    
+    
   },
   chatBar: {
     position: "absolute",
     height: "65%",
-    width: "98%",
+    width: "95%",
     bottom: "33%",
-    left: "2%",
+    left: "5%",
   },
   input: {
     flex: 1,
@@ -241,6 +284,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     backgroundColor: "white",
     bottom: '3%',
+    borderRadius: 20,
   },
   sendButtonContainer: {
     padding: "5%",
@@ -248,7 +292,7 @@ const styles = StyleSheet.create({
   sendButton: {
     height: 42,
     width: 42,
-    left: "30%",
+    left: "0%",
     bottom: '28%',
   },
 });
