@@ -68,7 +68,7 @@ const responseGeneration = async (userMessage) => {
   try {
     const completion = await openai.chat.completions.create({
       messages: [
-        { role: 'system', content: 'You are a chatbot in an app called AudioNote. This app is used to record audio-notes of conversations, discussions, meetings, lectures, etc. You have the responsibility to answer any questions from any of the audio-notes that the user has made in this app.' },
+        { role: 'system', content: 'You are a chatbot in an app called AudioNote. This app is used to record audio-notes of conversations, discussions, meetings, lectures, etc. You have the responsibility to answer any questions from any of the audio-notes that the user has made in this app. In front of every line of audionotes context, there is the date and time present in square brackets. The date and time inside those square brackets is not content from the audionote otself, that is just for you to know that when an audionote was made by the user.' },
         { role: 'user', content: userMessage }
       ],
       model: "gpt-3.5-turbo",

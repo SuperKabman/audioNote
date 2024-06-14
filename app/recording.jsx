@@ -202,19 +202,37 @@ export default function App() {
       const transcriptionFile = `${recordingDir}/transcription.txt`;
       await FileSystem.writeAsStringAsync(transcriptionFile, transcription);
       console.log("Transcription saved to:", transcriptionFile);
+
+      const getFormattedDateTime = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      };
   
-      // Append the transcription to the common file
-      const commonTranscriptionFile = `${FileSystem.documentDirectory}recordings/common_transcription.txt`;
-      let commonTranscriptionContent = await FileSystem.readAsStringAsync(
-        commonTranscriptionFile,
-        { encoding: FileSystem.EncodingType.UTF8 }
-      ).catch(() => "");
-      commonTranscriptionContent += `\n\n${transcription}`;
-      await FileSystem.writeAsStringAsync(
-        commonTranscriptionFile,
-        commonTranscriptionContent
-      );
-      console.log("Transcription appended to common file");
+        // Append the transcription to the common file
+        const commonTranscriptionFile = `${FileSystem.documentDirectory}recordings/common_transcription.txt`;
+
+        let commonTranscriptionContent = await FileSystem.readAsStringAsync(
+          commonTranscriptionFile,
+          { encoding: FileSystem.EncodingType.UTF8 }
+        ).catch(() => "");
+
+        const formattedDateTime = getFormattedDateTime();
+        const formattedTranscription = `\n\n[${formattedDateTime}] ${transcription}`;
+
+        commonTranscriptionContent += formattedTranscription;
+
+        await FileSystem.writeAsStringAsync(
+          commonTranscriptionFile,
+          commonTranscriptionContent
+        );
+
+      console.log("appended:", commonTranscriptionContent);
   
       // Save the metadata in a file
       const metadataFile = `${recordingDir}/metadata.json`;
