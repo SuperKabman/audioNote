@@ -62,7 +62,7 @@ const Files = () => {
 
   const handleDirectoryClick = (path) => {
     if (!isSelectionMode) {
-      navigation.navigate("file_details", { path });
+      navigation.navigate("file_details", {dir: path });
       console.log(`Directory ${path} clicked`);
     }
   };
@@ -88,7 +88,7 @@ const Files = () => {
         }
       });
     } else {
-      handleDirectoryClick(directory.path);
+      handleDirectoryClick(directory.name);
     }
   };
 
@@ -114,7 +114,7 @@ const Files = () => {
       for (const directoryPath of selectedItems) {
         const items = await FileSystem.readDirectoryAsync(directoryPath);
         for (const item of items) {
-          if (item.endsWith('.m4a') || item.endsWith('.wav') || item === 'summary.txt') {
+          if (item.endsWith('.m4a') || item.endsWith('.wav') || item === 'summary.txt' || item === 'transcription.txt' || item === 'word_time_mapping.json') {
             const itemPath = `${directoryPath}/${item}`;
             const newFileName = `${directoryPath.split('/').pop()}_${item}`;
             const newFilePath = `${tempDir}/${newFileName}`;

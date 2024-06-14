@@ -1,8 +1,7 @@
 import { View, Text } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import FileSystem from 'expo-file-system'
 import { TouchableOpacity } from 'react-native';
-
 // the directory contains the following files: 
 //transcription.txt
 //audio.mp3
@@ -10,72 +9,74 @@ import { TouchableOpacity } from 'react-native';
 //summary.txt
 //metadata.txt
 
-const file_details = ({route}) => {
-  const { directory } = route.params;
+const FileDetails = ({ route }) => {
+  console.log(route.parms.dir);
+  const { path } = route.params;
 
   const [transcription, setTranscription] = useState("");
   const [wordTimeMapping, setWordTimeMapping] = useState("");
   const [summary, setSummary] = useState("");
 
-
   useEffect(() => {
     const fetchTranscription = async () => {
       try {
-        const transcriptionPath = `${directory}/transcription.txt`;
+        const transcriptionPath = `${path}/transcription.txt`;
         const transcriptionRaw = await FileSystem.readAsStringAsync(transcriptionPath);
         setTranscription(transcriptionRaw);
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Failed to fetch transcription", error);
       }
-    }
-    
+    };
+
     const fetchWordTimeMapping = async () => {
       try {
-        const wordTimeMappingPath = `${directory}/word_time_mapping.json`;
+        const wordTimeMappingPath = `${path}/word_time_mapping.json`;
         const wordTimeMappingRaw = await FileSystem.readAsStringAsync(wordTimeMappingPath);
         setWordTimeMapping(wordTimeMappingRaw);
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Failed to fetch word time mapping", error);
       }
-    }
+    };
 
     const fetchSummary = async () => {
       try {
-        const summaryPath = `${directory}/summary.txt`;
+        const summaryPath = `${path}/summary.txt`;
         const summaryRaw = await FileSystem.readAsStringAsync(summaryPath);
         setSummary(summaryRaw);
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Failed to fetch summary", error);
       }
-    }
+    };
 
-  }, [directory]);
+    fetchTranscription();
+    fetchWordTimeMapping();
+    fetchSummary();
+  }, [path]); // Ensure useEffect runs when 'path' changes
 
   const handleSentenceClick = (sentence) => {
     console.log(`Sentence clicked: ${sentence}`);
-  }
+    // Add your functionality here
+  };
 
-  const handleScentenceLongPress = (sentence) => {
+  const handleSentenceLongPress = (sentence) => {
     console.log(`Sentence long pressed: ${sentence}`);
-  }
+    // Add your functionality here
+  };
 
   return (
     <View>
       {summary.split(".").map((sentence, index) => (
-        <TouchableOpacity 
-          key={index} 
-          onPress={() => handleSentenceClick(sentence)} // highlight the scentence when clicked
-          onLongPress={() => handleScentenceLongPress(sentence)} // go to the audio file and play the sentence
-          delayLongPress={1000} // 1 second delay for long press
+        <TouchableOpacity
+          key={index}
+          onPress={() => handleSentenceClick(sentence)}
+          onLongPress={() => handleSentenceLongPress(sentence)}
+          delayLongPress={1000}
         >
           <Text>{sentence}</Text>
         </TouchableOpacity>
       ))}
     </View>
-  )
-}
+  );
+};
 
-export default file_details
+export default FileDetails;
