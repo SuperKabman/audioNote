@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,21 +8,68 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import axios from "axios";
 import OpenAI from "openai";
 import { Redirect } from "expo-router";
 import { API_KEY } from "@/keys/config";
-import { KeyboardAvoidingView, Platform } from "react-native";
 import Backbutton from "../assets/images/backbuttonSVG.svg";
+import * as FileSystem from "expo-file-system";
+import { useNavigation } from "expo-router";
 
 const openai = new OpenAI({ apiKey: API_KEY });
+
+const loadChatContext = async () => {
+  try {
+    const commonTranscriptionFile = `${FileSystem.documentDirectory}recordings/common_transcription.txt`;
+    const context = await FileSystem.readAsStringAsync(commonTranscriptionFile, { encoding: FileSystem.EncodingType.UTF8 });
+    console.log("Chat context loaded:", context);
+    return context;
+  } catch (error) {
+    console.error("Error loading chat context:", error);
+    throw error; // Propagate the error up to handle it elsewhere if needed
+  }
+};
+
+const appendExistingTranscriptions = async () => {
+  try {
+    const recordingsDir = `${FileSystem.documentDirectory}recordings/`;
+    const dirInfo = await FileSystem.readDirectoryAsync(recordingsDir);
+    let commonTranscriptionContent = await FileSystem.readAsStringAsync(`${recordingsDir}common_transcription.txt`, { encoding: FileSystem.EncodingType.UTF8 }).catch(() => "");
+
+    for (const subDir of dirInfo) {
+      const subDirPath = `${recordingsDir}${subDir}`;
+      const transcriptionFilePath = `${subDirPath}/transcription.txt`;
+
+      const fileInfo = await FileSystem.getInfoAsync(transcriptionFilePath);
+      if (fileInfo.exists) {
+        const transcription = await FileSystem.readAsStringAsync(transcriptionFilePath, { encoding: FileSystem.EncodingType.UTF8 });
+        commonTranscriptionContent += `\n\n${transcription}`;
+      }
+    }
+
+    await FileSystem.writeAsStringAsync(`${recordingsDir}common_transcription.txt`, commonTranscriptionContent);
+    console.log("All existing transcriptions appended to common file");
+  } catch (error) {
+    console.error("Error appending existing transcriptions:", error);
+    throw error; // Propagate the error up to handle it elsewhere if needed
+  }
+};
+
+const initializeChat = async () => {
+  await appendExistingTranscriptions();
+  const context = await loadChatContext();
+  console.log("Chat context loaded:", context);
+  return context;
+};
 
 const responseGeneration = async (userMessage) => {
   try {
     const completion = await openai.chat.completions.create({
-      messages: [{ role: 'system', content: 'You are a chatbot in an app called AudioNote. This app is used to record audio-notes of conversations, discussions, meetings, lectures, etc. You have the responsibility to answer any questions from any of the audio-notes that the user has made in this app. '},
-        {role:'user', content: userMessage}
+      messages: [
+        { role: 'system', content: 'You are a chatbot in an app called AudioNote. This app is used to record audio-notes of conversations, discussions, meetings, lectures, etc. You have the responsibility to answer any questions from any of the audio-notes that the user has made in this app.' },
+        { role: 'user', content: userMessage }
       ],
       model: "gpt-3.5-turbo",
     });
@@ -33,58 +80,66 @@ const responseGeneration = async (userMessage) => {
       "Response Generation Failed",
       "An error occurred while trying to generate the response."
     );
+    throw error; // Propagate the error up to handle it elsewhere if needed
   }
 };
-let context = "";
+
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [shouldRedirect, setShouldRedirect] = useState(false);
-  
-  
+  const [localContext, setLocalContext] = useState("");
+  const [chatContext, setChatContext] = useState("");
+
   const sendMessage = async () => {
     const userMessage = input;
-    context = context+'\n'+userMessage;
+    setLocalContext(prevLocalContext => prevLocalContext + '\n' + userMessage);
     setMessages([...messages, { sender: "user", text: userMessage }]);
     setInput("");
-  
+
     try {
-      
-      const response = await responseGeneration(context+'\n\n\n'+userMessage);
-      
-const botMessage = response.choices[0].message.content;
-      setMessages((prevMessages) => [
+      const context = await initializeChat();
+      setChatContext(context);
+
+      const response = await responseGeneration(`context from audionotes: \n${context}\n context from this conversation: \n${localContext}\n\n user query: ${userMessage}`);
+      const botMessage = response.choices[0].message.content;
+
+      setMessages(prevMessages => [
         ...prevMessages,
         { sender: "bot", text: botMessage },
-        
       ]);
-      
-    
-      
-   
 
     } catch (error) {
       console.error("Error during chat:", error);
     }
   };
 
-  const redirectHome = () => {
-    setShouldRedirect(true);
-  };
+  const resetVariables  = async () => {
+    setLocalContext("");
+    setChatContext("");
+    const commonTranscriptionFile = `${FileSystem.documentDirectory}recordings/common_transcription.txt`;
+    try {
+      await FileSystem.writeAsStringAsync(commonTranscriptionFile, "", { encoding: FileSystem.EncodingType.UTF8 });
+      console.log("Common transcription file reset to empty");
+    } catch (error) {
+      console.error("Failed to reset common transcription file:", error);
+    }
+  }
 
-  if (shouldRedirect) {
-    context = "";
-    return <Redirect href="/home" />;
+  const handleBackButton = () => {
+    resetVariables(); 
+    setShouldRedirect(true);
   }
 
   return (
     <View style={styles.container}>
+      {shouldRedirect && <Redirect href='/home' />}
       <Image
         source={require("../assets/images/chatCanvas.png")}
         style={styles.canvas}
       />
       <TouchableOpacity
-        onPress={redirectHome}
+        onPress={handleBackButton}
         style={styles.backButtonContainer}
       >
         <Backbutton />
@@ -98,7 +153,7 @@ const botMessage = response.choices[0].message.content;
         ))}
       </ScrollView>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-       style={styles.inputContainer} >
+        style={styles.inputContainer} >
         <Image
           source={require("../assets/images/chatBar.png")}
           style={styles.chatBar}
@@ -194,7 +249,7 @@ const styles = StyleSheet.create({
     height: 42,
     width: 42,
     left: "30%",
-    bottom:'28%',
+    bottom: '28%',
   },
 });
 

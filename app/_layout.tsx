@@ -39,6 +39,7 @@ export default function RootLayout() {
       <Stack.Screen name="global_chat" options={{headerShown: false}}/>
       <Stack.Screen name="index" options={{headerShown: false}}/>
       <Stack.Screen name="files_details" options={{headerShown: false}}/>
+      <Stack.Screen name="/home" options={{headerShown: false}}/>
     </Stack>
   );
 }

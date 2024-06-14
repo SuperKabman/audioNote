@@ -29,7 +29,7 @@ const file_details = ({route}) => {
         console.error("Failed to fetch transcription", error);
       }
     }
-
+    
     const fetchWordTimeMapping = async () => {
       try {
         const wordTimeMappingPath = `${directory}/word_time_mapping.json`;

@@ -194,12 +194,19 @@ export default function App() {
           : `${recordingDir}/recording.m4a`;
       await FileSystem.moveAsync({ from: uri, to: fileURI });
       console.log("Recording saved to:", fileURI);
-
+        
       // saving the transcription in a file
       console.log("Transcription:", transcription);
       const transcriptionFile = `${recordingDir}/transcription.txt`;
       await FileSystem.writeAsStringAsync(transcriptionFile, transcription);
       console.log("Transcription saved to:", transcriptionFile);
+
+      // Appending the transcription to the common file
+      const commonTranscriptionFile = `${FileSystem.documentDirectory}recordings/common_transcription.txt`;
+      let commonTranscriptionContent = await FileSystem.readAsStringAsync(commonTranscriptionFile, { encoding: FileSystem.EncodingType.UTF8 }).catch(() => "");
+      commonTranscriptionContent += `\n\n${transcription}`;
+      await FileSystem.writeAsStringAsync(commonTranscriptionFile, commonTranscriptionContent);
+      console.log("Transcription appended to common file");
 
       //saving the metadata in a file
       const metadataFile = `${recordingDir}/metadata.json`;
