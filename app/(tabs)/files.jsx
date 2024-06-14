@@ -13,6 +13,7 @@ import * as Sharing from "expo-sharing";
 import { useNavigation } from "@react-navigation/native";
 import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from "expo-router";
 import JSZip from "jszip";
 
 const Files = () => {
@@ -20,6 +21,7 @@ const Files = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const navigation = useNavigation();
+  const router = useRouter();
 
   useEffect(() => {
     listDirectories();
@@ -60,9 +62,12 @@ const Files = () => {
     }
   };
 
-  const handleDirectoryClick = (path) => {
+  const handleDirectoryClick = (path, name) => {
     if (!isSelectionMode) {
-      navigation.navigate("file_details", {dir: path });
+      router.push({
+        pathname: "file_details",
+        params: { path: path, file_name: name},
+      })
       console.log(`Directory ${path} clicked`);
     }
   };
@@ -88,7 +93,7 @@ const Files = () => {
         }
       });
     } else {
-      handleDirectoryClick(directory.name);
+      handleDirectoryClick(directory.path, directory.name);
     }
   };
 
@@ -151,10 +156,6 @@ const Files = () => {
     listDirectories();
   }, []);
 
-  useEffect(() => {
-    listDirectories();
-  }, []);
-
   return (
     <MenuProvider>
       <SafeAreaView>
@@ -178,7 +179,7 @@ const Files = () => {
                   styles.buttonContainer,
                   selectedItems.includes(directory.path) && styles.selectedButtonContainer
                 ]}
-                onPress={() => handleTapSelect(directory)}
+                onPress={() => handleTapSelect(directory )}
                 onLongPress={() => handleLongPress(directory)}
                 delayLongPress={200}
               >

@@ -39,8 +39,8 @@ export default function RootLayout() {
       <Stack.Screen name="global_chat" options={{headerShown: false}}/>
       <Stack.Screen name="index" options={{headerShown: false}}/>
       <Stack.Screen name="file_details" options={{headerShown: false}}/>
-      <Stack.Screen name="files" options={{headerShown: false}}/>
       <Stack.Screen name="options" options={{headerShown: false}}/>
+      <Stack.Screen name="local_chat" options={{headerShown: false}}/>
     </Stack>
   );
 }
