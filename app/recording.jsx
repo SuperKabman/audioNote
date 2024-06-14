@@ -181,65 +181,82 @@ export default function App() {
 
   const handleSave = async () => {
     try {
-      //creating the directory
+      // Create the directory
       const recordingDir = `${FileSystem.documentDirectory}recordings/${filename}`;
+      console.log("Creating directory:", recordingDir);
       await FileSystem.makeDirectoryAsync(recordingDir, {
         intermediates: true,
       });
-
-      // saving the audio file in the directory
+  
+      // Save the audio file in the directory
       const fileURI =
         Platform.OS === "ios"
           ? `${recordingDir}/recording.wav`
           : `${recordingDir}/recording.m4a`;
+      console.log("Moving file from", uri, "to", fileURI);
       await FileSystem.moveAsync({ from: uri, to: fileURI });
       console.log("Recording saved to:", fileURI);
-        
-      // saving the transcription in a file
-      console.log("Transcription:", transcription);
+  
+      // Save the transcription in a file
+      console.log("Saving transcription...");
       const transcriptionFile = `${recordingDir}/transcription.txt`;
       await FileSystem.writeAsStringAsync(transcriptionFile, transcription);
       console.log("Transcription saved to:", transcriptionFile);
-
-      // Appending the transcription to the common file
+  
+      // Append the transcription to the common file
       const commonTranscriptionFile = `${FileSystem.documentDirectory}recordings/common_transcription.txt`;
-      let commonTranscriptionContent = await FileSystem.readAsStringAsync(commonTranscriptionFile, { encoding: FileSystem.EncodingType.UTF8 }).catch(() => "");
+      let commonTranscriptionContent = await FileSystem.readAsStringAsync(
+        commonTranscriptionFile,
+        { encoding: FileSystem.EncodingType.UTF8 }
+      ).catch(() => "");
       commonTranscriptionContent += `\n\n${transcription}`;
-      await FileSystem.writeAsStringAsync(commonTranscriptionFile, commonTranscriptionContent);
+      await FileSystem.writeAsStringAsync(
+        commonTranscriptionFile,
+        commonTranscriptionContent
+      );
       console.log("Transcription appended to common file");
-
-      //saving the metadata in a file
+  
+      // Save the metadata in a file
       const metadataFile = `${recordingDir}/metadata.json`;
       const recordingLengthSeconds = progress;
       const metadata = {
         recordingDate: new Date().toLocaleDateString(),
         recordingLength: `${recordingLengthSeconds} seconds`,
       };
-      console.log("Metadata:", metadata);
+      console.log("Saving metadata:", metadata);
       await FileSystem.writeAsStringAsync(
         metadataFile,
         JSON.stringify(metadata)
       );
       console.log("Metadata saved to:", metadataFile);
-
-      // saving the summary in a file
-      console.log("Summary:", generatedSummary);
+  
+      // Save the summary in a file
+      console.log("Saving summary...");
       const summaryFile = `${recordingDir}/summary.txt`;
       await FileSystem.writeAsStringAsync(summaryFile, generatedSummary);
       console.log("Summary saved to:", summaryFile);
-
-      // saving the word-time-mapping
-      console.log("Word-time mapping:", wordTimeMapping);
+  
+      // Save the word-time mapping
+      console.log("Saving word-time mapping...");
       const wordTimeMappingFile = `${recordingDir}/word_time_mapping.json`;
       await FileSystem.writeAsStringAsync(
         wordTimeMappingFile,
         JSON.stringify(wordTimeMapping)
       );
       console.log("Word-time mapping saved to:", wordTimeMappingFile);
+
+      handleBackButton();
+      
     } catch (error) {
       console.error("Error saving recording:", error);
+      Alert.alert(
+        "Save Error",
+        "There was an error saving the recording. Please try again.",
+        [{ text: "OK" }]
+      );
     }
   };
+  
 
   const handleResetFile = async () => {
     setGeneratedResponse("");
@@ -341,7 +358,7 @@ export default function App() {
 
   const navigation = useNavigation();
 
-  const handleDelete = async () => {
+  const handleBackButton = async () => {
     handleResetFile();
     setRecordingVar(null);
     navigation.navigate("home");
@@ -419,7 +436,7 @@ export default function App() {
   ) : (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ position: 'absolute', top: '5%', left: "5%" }}>
-        <TouchableOpacity onPress={handleDelete}>
+        <TouchableOpacity onPress={handleBackButton}>
           <View
             style={{
               width: 40,
