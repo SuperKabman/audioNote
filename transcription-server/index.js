@@ -273,6 +273,40 @@ app.post("/find-sentence", (req, res) => {
   }
 });
 
+app.post("/find-summary-line", async (req, res) => {
+  const { summaryLine, transcription } = req.body;
+  if (!summaryLine || !transcription) {
+    return res.status(400).send({ error: "Both summaryLine and transcription are required." });
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are a highly accurate transcription matching assistant. You will receive a transcription and a line from a summary. Your task is to find the exact sentence in the transcription that corresponds to the given summary line. Your output should only be the single transcription sentence without any quotations or anyhting else. Just a plain sentence from the transcription that corresponds witht the summary line."
+        },
+        {
+          role: "user",
+          content: `Transcription: "${transcription}"\n\nSummary line: "${summaryLine}"`
+        }
+      ],
+    });
+
+    const matchingSentence = response.choices[0].message.content.trim();
+
+    if (matchingSentence) {
+      res.json({ matchingSentence: matchingSentence });
+    } else {
+      res.status(404).send({ error: "Matching sentence not found in the transcription." });
+    }
+  } catch (error) {
+    console.error("Error finding summary line:", error);
+    res.status(500).send({ error: "Error finding summary line." });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
