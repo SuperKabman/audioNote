@@ -307,6 +307,24 @@ app.post("/find-summary-line", async (req, res) => {
   }
 });
 
+// app.post("/localHelp", async (req, res) => {
+//   const { transcription } = req.body;
+
+//   const response = await openai.chat.completions.create({
+//     model: "gpt-3.5-turbo",
+//     messages: [
+//       {
+//         role:"system",
+//         content: "You are a simple assistant bot in the audionote app who will answer any questions related to the transcription that you are going to be given in this prompt. You will be given a transcription of a conversation and you will have to answer any questions that the user might have about the transcription. You will always address the transcription as 'the conversation'. The transcription: \n\n" + transcription
+//       },
+//       {
+//         role: 'user'
+//       }
+//     ]
+//   })
+// });
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

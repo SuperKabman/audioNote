@@ -8,6 +8,9 @@ import Back_icon from "../assets/images/caret-left-solid.svg";
 import Ai_icon from "../assets/images/robot-solid.svg";
 import axios from "axios";
 import { LOCAL_IP_ADDRESS } from "../keys/config";
+import TranscriptionButton from "../assets/images/seeTranscriptionVSG.svg"
+import Listen from "../assets/images/audioTranscription.png"
+import {Image} from 'react-native'
 
 const FileDetails = () => {
   const { path, file_name } = useLocalSearchParams();
@@ -109,6 +112,22 @@ const FileDetails = () => {
     });
   };
 
+  const handletranscriptionAudioButton = () => {
+    console.log("Transcription audio button clicked");
+    router.push({
+      pathname: "transcription_audio",
+      params: {transcription:transcription}
+    });
+  }
+
+  const handleTranscriptionButton = () => {
+    console.log("Transcription button clicked");
+    router.push({
+      pathname: "local_transcription",
+      params: {transcription:transcription}
+    });
+  }
+
   const sentenceStyle = (sentence) => {
     return {
       fontFamily: selectedSentence === sentence ? "IBMPlexMono-SemiBold" : "IBMPlexMono-Regular",
@@ -168,29 +187,60 @@ const FileDetails = () => {
       </View>
 
       <View
-        style={{
-          position: "absolute",
-          bottom: 20,
-          left: 0,
-          right: 0,
-          alignItems: "center",
-        }}
-      >
-        <TouchableOpacity onPress={handleAiButton}>
-          <View
-            style={{
-              width: 70,
-              height: 70,
-              borderRadius: 35,
-              backgroundColor: "black",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Ai_icon height="40" width="40" fill="white" />
-          </View>
-        </TouchableOpacity>
-      </View>
+  style={{
+    position: "absolute",
+    bottom: 40,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  }}
+>
+<TouchableOpacity onPress={handleTranscriptionButton}>
+    <View
+      style={{
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: "black",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <TranscriptionButton height="65" width="65" fill="white" />
+    </View>
+  </TouchableOpacity>
+  <TouchableOpacity onPress={handleAiButton}>
+    <View
+      style={{
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: "black",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Ai_icon height="40" width="40" fill="white" />
+    </View>
+  </TouchableOpacity>
+
+  
+  <TouchableOpacity onPress={handletranscriptionAudioButton}>
+    <View
+      style={{
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: "black",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+    <Image source={Listen} style={{width: 60, height: 60}}/>
+    </View>
+  </TouchableOpacity>
+</View>
     </SafeAreaView>
   );
 };

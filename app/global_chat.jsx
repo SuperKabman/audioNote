@@ -39,6 +39,10 @@ const appendExistingTranscriptions = async () => {
     let commonTranscriptionContent = await FileSystem.readAsStringAsync(`${recordingsDir}common_transcription.txt`, { encoding: FileSystem.EncodingType.UTF8 }).catch(() => "");
 
     for (const subDir of dirInfo) {
+      if (!subDir) {
+        console.warn("Subdirectory name is not defined, skipping this iteration");
+        continue;
+      }
       const subDirPath = `${recordingsDir}${subDir}`;
       const transcriptionFilePath = `${subDirPath}/transcription.txt`;
 
@@ -83,24 +87,23 @@ const responseGeneration = async (userMessage) => {
     throw error; // Propagate the error up to handle it elsewhere if needed
   }
 };
-
+let localContext = "";
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [shouldRedirect, setShouldRedirect] = useState(false);
-  const [localContext, setLocalContext] = useState("");
   const [chatContext, setChatContext] = useState("");
 
   const sendMessage = async () => {
     const userMessage = input;
-    setLocalContext(prevLocalContext => prevLocalContext + '\n' + userMessage);
+    localContext = localContext + '\n' + userMessage; 
     setMessages([...messages, { sender: "user", text: userMessage }]);
     setInput("");
 
     try {
       const context = await initializeChat();
       setChatContext(context);
-
+      
       const response = await responseGeneration(`context from audionotes: \n${context}\n context from this conversation: \n${localContext}\n\n user query: ${userMessage}`);
       const botMessage = response.choices[0].message.content;
 
@@ -149,7 +152,7 @@ const Chat = () => {
       <ScrollView style={styles.messagesContainer}>
       {messages.length === 0 ? (
           <Text style={styles.welcomeMessage}>
-            Hi, ask me anything from your audionotes and beyond.
+            Hi, ask me anything from any of your audionotes and beyond.
           </Text>
         ) : (
           messages.map((message, index) => (
