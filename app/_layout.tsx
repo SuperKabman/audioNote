@@ -41,6 +41,8 @@ export default function RootLayout() {
       <Stack.Screen name="file_details" options={{headerShown: false}}/>
       <Stack.Screen name="options" options={{headerShown: false}}/>
       <Stack.Screen name="local_chat" options={{headerShown: false}}/>
+      <Stack.Screen name="local_transcription" options={{headerShown: false}}/>
+      <Stack.Screen name="showTranscription" options={{headerShown: false}}/>
     </Stack>
   );
 }

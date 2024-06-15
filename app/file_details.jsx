@@ -37,7 +37,8 @@ const FileDetails = () => {
       try {
         const wordTimeMappingPath = `${path}/word_time_mapping.json`;
         const wordTimeMappingRaw = await FileSystem.readAsStringAsync(wordTimeMappingPath);
-        setWordTimeMapping(wordTimeMappingRaw);
+        const wordTimeMapping = JSON.parse(wordTimeMappingRaw);
+        setWordTimeMapping(wordTimeMapping);
         console.log("word time mapping fetched");
       } catch (error) {
         console.error("Failed to fetch word time mapping", error);
@@ -74,6 +75,7 @@ const FileDetails = () => {
     const requestData = {
       summaryLine: sentence,
       transcription: transcription,
+      wordTimeMapping: wordTimeMapping,
     };
   
     try {
@@ -87,11 +89,13 @@ const FileDetails = () => {
         }
       );
       const targetSentence = response.data.matchingSentence;
-      console.log("target sentence: \n", targetSentence);
+      const startTime = response.data.startTime;
+      const endTime = response.data.endTime;
+      console.log("target sentence:", targetSentence + "\n" + "start time: ", startTime + "\n" + "end time:", endTime) ;
 
       router.push({
         pathname: "showTranscription",
-        params: { targetSentence: targetSentence},
+        params: { path: path, targetSentence: targetSentence, startTime: response.data.startTime, endTime: response.data.endTime},
       });
     }
     catch (error) {
@@ -112,19 +116,11 @@ const FileDetails = () => {
     });
   };
 
-  const handletranscriptionAudioButton = () => {
-    console.log("Transcription audio button clicked");
-    router.push({
-      pathname: "transcription_audio",
-      params: {transcription:transcription}
-    });
-  }
-
   const handleTranscriptionButton = () => {
     console.log("Transcription button clicked");
     router.push({
       pathname: "local_transcription",
-      params: {transcription:transcription}
+      params: {path: path}
     });
   }
 
@@ -132,13 +128,13 @@ const FileDetails = () => {
     return {
       fontFamily: selectedSentence === sentence ? "IBMPlexMono-SemiBold" : "IBMPlexMono-Regular",
       fontSize: 17,
-      color: selectedSentence === sentence ? "black" : "grey",
+      color: selectedSentence === sentence ? "white" : "grey",
       textAlign: "left",
     };
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
       <View style={{ position: "absolute", top: "5%", left: "5%" }}>
         <TouchableOpacity onPress={handleBackButton}>
           <View
@@ -146,12 +142,12 @@ const FileDetails = () => {
               width: 40,
               height: 40,
               borderRadius: 20,
-              backgroundColor: "black",
+              backgroundColor: "white",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Back_icon height="20" width="20" fill="white" />
+            <Back_icon height="20" width="20" fill="black" />
           </View>
         </TouchableOpacity>
       </View>
@@ -160,7 +156,7 @@ const FileDetails = () => {
         <Text
           style={{
             fontFamily: "IBMPlexMono-SemiBold",
-            color: "black",
+            color: "white",
             fontSize: 30,
             textAlign: "center",
             marginBottom: "7%",
@@ -202,12 +198,12 @@ const FileDetails = () => {
         width: 70,
         height: 70,
         borderRadius: 35,
-        backgroundColor: "black",
+        backgroundColor: "white",
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      <TranscriptionButton height="65" width="65" fill="white" />
+      <TranscriptionButton height="65" width="65" fill="black" />
     </View>
   </TouchableOpacity>
   <TouchableOpacity onPress={handleAiButton}>
@@ -216,28 +212,12 @@ const FileDetails = () => {
         width: 70,
         height: 70,
         borderRadius: 35,
-        backgroundColor: "black",
+        backgroundColor: "white",
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      <Ai_icon height="40" width="40" fill="white" />
-    </View>
-  </TouchableOpacity>
-
-  
-  <TouchableOpacity onPress={handletranscriptionAudioButton}>
-    <View
-      style={{
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        backgroundColor: "black",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-    <Image source={Listen} style={{width: 60, height: 60}}/>
+      <Ai_icon height="40" width="40" fill="black" />
     </View>
   </TouchableOpacity>
 </View>

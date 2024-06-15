@@ -13,37 +13,15 @@ import { TextInput } from 'react-native'
 import { Redirect } from 'expo-router'    
 import { API_KEY } from "@/keys/config";
 import OpenAI from "openai";
+import { useNavigation } from 'expo-router'
 const openai = new OpenAI({ apiKey: API_KEY });
 
-
-
-const responseGeneration = async (userMessage) => {
-
-  
-  try {
-    const completion = await openai.chat.completions.create({
-      messages: [
-        { role: 'system', content: "You are a simple assistant bot in the audionote app who will answer any questions related to the transcription that you are going to be given in this prompt. You will be given a transcription of a conversation and you will have to answer any questions that the user might have about the transcription. You will always address the transcription as 'the conversation'. The transcription: \n\n" + transcription },
-        { role: 'user', content: userMessage }
-      ],
-      model: "gpt-3.5-turbo",
-    });
-    return completion;
-  } catch (error) {
-    console.error("Failed to generate response:", error);
-    Alert.alert(
-      "Response Generation Failed",
-      "An error occurred while trying to generate the response."
-    );
-    throw error; 
-  }
-};
 
 let context = "";
 const local_chat = () => {
 
   const {transcription} = useLocalSearchParams(); 
-
+  const navigation = useNavigation();
   const responseGeneration = async (userMessage) => {
 
   
@@ -68,8 +46,6 @@ const local_chat = () => {
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [shouldRedirect, setShouldRedirect] = useState(false);
-
 
 
   const sendMessage = async () => {
@@ -79,9 +55,6 @@ const local_chat = () => {
     setInput("");
 
     try {
-      
-      
-
       const response = await responseGeneration(context+'\n\n\n'+userMessage);
       const botMessage = response.choices[0].message.content;
 
@@ -96,13 +69,11 @@ const local_chat = () => {
   };
   
   const handleBackButton = () => {
-     
-    setShouldRedirect(true);
+    navigation.goBack();
   }
 
   return (
     <View style={styles.container}>
-      {shouldRedirect && <Redirect href='/file_details' />}
       <Image
         source={require("../assets/images/chatCanvas.png")}
         style={styles.canvas}

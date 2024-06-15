@@ -11,6 +11,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 const upload = multer({ dest: "uploads/" });
 const OpenAI = require("openai");
+const { log } = require("@grpc/grpc-js/build/src/logging");
 const openai = new OpenAI({
   apiKey: "sk-proj-mwk4p3idrv3rzkJtElxFT3BlbkFJVjp4tnLPFWBuY5lj02qK",
 });
@@ -228,53 +229,74 @@ async function convertToMP3(inputFile, outputFile) {
   });
 }
 
-app.post("/find-sentence", (req, res) => {
-  const { sentence } = req.body;
-  if (!sentence) {
-    return res.status(400).send("Sentence is required.");
-  }
+function findSentenceTime(sentence, wordTimeMapping) {
+  console.log("Finding time for sentence:", sentence);
+  const words = sentence.split(' ');
+  let startTime = null;
+  let endTime = null;
 
-  try {
-    const wordTimeMapping = JSON.parse(
-      fs.readFileSync(wordTimeMappingFilePath)
-    );
-    const words = sentence.split(" ");
+  console.log("words:", words);
 
-    let startTime = null;
-    let endTime = null;
-    let wordIndex = 0;
+  // Find the start time
+  for (let i = 0; i < wordTimeMapping.length; i++) {
+    const mapping = wordTimeMapping[i];
+    const mappingWords = mapping.word.trim().split(' ');
+    console.log("mappingWords:", mappingWords);
 
-    for (let i = 0; i < wordTimeMapping.length; i++) {
-      if (
-        wordTimeMapping[i].word.toLowerCase() === words[wordIndex].toLowerCase()
-      ) {
-        if (wordIndex === 0) {
-          startTime = wordTimeMapping[i].startTime;
-        }
-        if (wordIndex === words.length - 1) {
-          endTime = wordTimeMapping[i].endTime;
+    // Check if the sentence starts here
+    if (words[0] === mappingWords[0]) {
+      let match = true;
+      for (let j = 0; j < mappingWords.length; j++) {
+        if (words[j] !== mappingWords[j]) {
+          match = false;
           break;
         }
-        wordIndex++;
-      } else {
-        wordIndex = 0;
-        startTime = null;
+      }
+      if (match) {
+        startTime = mapping.startTime;
+        break;
       }
     }
-
-    if (startTime !== null && endTime !== null) {
-      res.json({ sentence: sentence, startTime: startTime, endTime: endTime });
-    } else {
-      res.status(404).send("Sentence not found in the transcription.");
-    }
-  } catch (error) {
-    console.error("Error finding sentence:", error);
-    res.status(500).send("Error finding sentence.");
   }
-});
+
+  // Find the end time
+  for (let i = wordTimeMapping.length - 1; i >= 0; i--) {
+    const mapping = wordTimeMapping[i];
+    const mappingWords = mapping.word.split(' ');
+
+    // Check if the sentence ends here
+    let match = true;
+    let endIdx = -1;
+    for (let j = mappingWords.length - 1; j >= 0; j--) {
+      const wordIdx = words.length - (mappingWords.length - j);
+      if (wordIdx < 0 || words[wordIdx] !== mappingWords[j]) {
+        match = false;
+        break;
+      }
+      endIdx = wordIdx;
+    }
+
+    if (match) {
+      endTime = mapping.endTime;
+      // Adjust endTime based on where the sentence actually ends within the segment
+      if (endIdx !== -1 && endIdx < words.length - 1) {
+        const nextWordEndTime = wordTimeMapping[i + 1]?.startTime; // Get start time of next segment if available
+        if (nextWordEndTime) {
+          endTime = nextWordEndTime;
+        }
+      }
+      break;
+    }
+  }
+
+  console.log("start time:", startTime, "end time:", endTime);
+  return { startTime, endTime };
+}
+
+
 
 app.post("/find-summary-line", async (req, res) => {
-  const { summaryLine, transcription } = req.body;
+  const { summaryLine, transcription, wordTimeMapping } = req.body;
   if (!summaryLine || !transcription) {
     return res.status(400).send({ error: "Both summaryLine and transcription are required." });
   }
@@ -296,8 +318,12 @@ app.post("/find-summary-line", async (req, res) => {
 
     const matchingSentence = response.choices[0].message.content.trim();
 
+    const { startTime, endTime } = findSentenceTime(matchingSentence, wordTimeMapping);
+
+    console.log("Start time:", startTime, "End time:", endTime);
+
     if (matchingSentence) {
-      res.json({ matchingSentence: matchingSentence });
+      res.json({ matchingSentence: matchingSentence, startTime: startTime, endTime: endTime});
     } else {
       res.status(404).send({ error: "Matching sentence not found in the transcription." });
     }
@@ -306,24 +332,6 @@ app.post("/find-summary-line", async (req, res) => {
     res.status(500).send({ error: "Error finding summary line." });
   }
 });
-
-// app.post("/localHelp", async (req, res) => {
-//   const { transcription } = req.body;
-
-//   const response = await openai.chat.completions.create({
-//     model: "gpt-3.5-turbo",
-//     messages: [
-//       {
-//         role:"system",
-//         content: "You are a simple assistant bot in the audionote app who will answer any questions related to the transcription that you are going to be given in this prompt. You will be given a transcription of a conversation and you will have to answer any questions that the user might have about the transcription. You will always address the transcription as 'the conversation'. The transcription: \n\n" + transcription
-//       },
-//       {
-//         role: 'user'
-//       }
-//     ]
-//   })
-// });
-
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
