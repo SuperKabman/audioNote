@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     borderTopColor: "transparent",
     borderRadius: 30,
     height: "7%",
-    marginBottom: "5%",
+    marginBottom: "10%",
     shadowColor: "transparent",
     margin: Platform.OS === "ios" ? "10%" : "5%",
     padding: Platform.OS === "ios" ? "10%" : "0%",

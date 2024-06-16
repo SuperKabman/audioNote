@@ -13,6 +13,34 @@ const App = () => {
   const [openTranslation, setOpenTranslation] = React.useState(false);
   const [openSummarySize, setOpenSummarySize] = React.useState(false);
 
+  const handleOpenLanguage = () => {
+    setOpenLanguage((prev) => !prev);
+    setOpenConversationType(false);
+    setOpenTranslation(false);
+    setOpenSummarySize(false);
+  };
+
+  const handleOpenConversationType = () => {
+    setOpenLanguage(false);
+    setOpenConversationType((prev) => !prev);
+    setOpenTranslation(false);
+    setOpenSummarySize(false);
+  };
+
+  const handleOpenTranslation = () => {
+    setOpenLanguage(false);
+    setOpenConversationType(false);
+    setOpenTranslation((prev) => !prev);
+    setOpenSummarySize(false);
+  };
+
+  const handleOpenSummarySize = () => {
+    setOpenLanguage(false);
+    setOpenConversationType(false);
+    setOpenTranslation(false);
+    setOpenSummarySize((prev) => !prev);
+  };
+
   const isNextInvisible = (index) => {
     if (index === 0) return openLanguage;
     if (index === 1) return openConversationType;
@@ -36,7 +64,7 @@ const App = () => {
             { label: 'English', value: 'English' },
             { label: 'Spanish', value: 'Spanish' },
           ]}
-          setOpen={setOpenLanguage}
+          setOpen={handleOpenLanguage}
           setValue={setLanguage}
           containerStyle={styles.pickerContainer}
           style={styles.picker}
@@ -55,7 +83,7 @@ const App = () => {
             { label: 'Casual', value: 'Casual' },
             { label: 'Formal', value: 'Formal' },
           ]}
-          setOpen={setOpenConversationType}
+          setOpen={handleOpenConversationType}
           setValue={setConversationType}
           containerStyle={styles.pickerContainer}
           style={styles.picker}
@@ -74,7 +102,7 @@ const App = () => {
             { label: 'None', value: 'None' },
             { label: 'Spanish', value: 'Spanish' },
           ]}
-          setOpen={setOpenTranslation}
+          setOpen={handleOpenTranslation}
           setValue={setTranslation}
           containerStyle={styles.pickerContainer}
           style={styles.picker}
@@ -93,7 +121,7 @@ const App = () => {
             { label: 'Brief', value: 'Brief' },
             { label: 'Detailed', value: 'Detailed' },
           ]}
-          setOpen={setOpenSummarySize}
+          setOpen={handleOpenSummarySize}
           setValue={setSummarySize}
           containerStyle={styles.pickerContainer}
           style={styles.picker}
@@ -199,8 +227,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   invisible: {
-    
-    left:'300%',
+    left: '300%',
   }
 });
 
