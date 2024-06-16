@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Reset from "../assets/images/resetButtonSVG.svg";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const App = () => {
   const [language, setLanguage] = React.useState('English');
@@ -12,6 +13,7 @@ const App = () => {
   const [openConversationType, setOpenConversationType] = React.useState(false);
   const [openTranslation, setOpenTranslation] = React.useState(false);
   const [openSummarySize, setOpenSummarySize] = React.useState(false);
+  const [customSummaryPrompt, setCustomSummaryPrompt] = React.useState('');
 
   const handleOpenLanguage = () => {
     setOpenLanguage((prev) => !prev);
@@ -49,6 +51,23 @@ const App = () => {
     return false;
   };
 
+  const handleSaveChanges = async () => {
+    try {
+      const settings = {
+        language,
+        conversationType,
+        translation,
+        summarySize,
+        customSummaryPrompt,
+      };
+      await AsyncStorage.setItem('settings', JSON.stringify(settings));
+      Alert.alert('Success', 'Settings saved successfully.');
+    } catch (error) {
+      console.error('Error saving settings', error);
+      Alert.alert('Error', 'Failed to save settings.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -69,7 +88,7 @@ const App = () => {
           containerStyle={styles.pickerContainer}
           style={styles.picker}
           textStyle={styles.pickerText}
-          zIndex={4000} 
+          zIndex={4000}
           zIndexInverse={1000}
         />
       </View>
@@ -88,7 +107,7 @@ const App = () => {
           containerStyle={styles.pickerContainer}
           style={styles.picker}
           textStyle={styles.pickerText}
-          zIndex={3000} 
+          zIndex={3000}
           zIndexInverse={2000}
         />
       </View>
@@ -107,7 +126,7 @@ const App = () => {
           containerStyle={styles.pickerContainer}
           style={styles.picker}
           textStyle={styles.pickerText}
-          zIndex={2000} 
+          zIndex={2000}
           zIndexInverse={3000}
         />
       </View>
@@ -126,7 +145,7 @@ const App = () => {
           containerStyle={styles.pickerContainer}
           style={styles.picker}
           textStyle={styles.pickerText}
-          zIndex={1000} 
+          zIndex={1000}
           zIndexInverse={4000}
         />
       </View>
@@ -137,9 +156,11 @@ const App = () => {
         multiline
         numberOfLines={4}
         placeholder=""
+        value={customSummaryPrompt}
+        onChangeText={setCustomSummaryPrompt}
       />
 
-      <TouchableOpacity style={styles.saveButton}>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
         <Text style={styles.saveButtonText}>Save Changes</Text>
       </TouchableOpacity>
     </View>
@@ -187,7 +208,7 @@ const styles = StyleSheet.create({
   picker: {
     backgroundColor: '#D3D3D3',
     borderRadius: 20,
-    zIndex: 5000, 
+    zIndex: 5000,
   },
   pickerText: {
     color: '#000',

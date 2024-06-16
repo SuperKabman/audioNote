@@ -239,8 +239,8 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   selectedButtonContainer: {
-    backgroundColor: "grey",
-    borderColor: "grey",
+    backgroundColor: "#4B4B4B",
+    borderColor: "white",
   },
   heading: {
     color: "#14140F",

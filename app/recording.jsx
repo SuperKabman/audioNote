@@ -23,6 +23,7 @@ import { useNavigation } from "expo-router";
 import Back_icon from "../assets/images/caret-left-solid.svg";
 import { ScrollView } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const openai = new OpenAI({
   apiKey: API_KEY,
@@ -68,9 +69,21 @@ export default function App() {
   const [isRenameVisible, setIsRenameVisible] = useState(false);
   const [filename, setFilename] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const [settings, setSettings] = useState(null);
 
   useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const storedSettings = await AsyncStorage.getItem("settings");
+        if (storedSettings) {
+          setSettings(JSON.parse(storedSettings));
+        }
+      }catch (error) {
+        console.error("Error loading settings:", error);
+      }
+    };
     getPermissions();
+    loadSettings();
   }, []);
 
   const getPermissions = async () => {
@@ -382,7 +395,7 @@ export default function App() {
     navigation.navigate("home");
   };
 
-  return !isRecording ? (
+  return isRecording ? (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#14140F" }}>
       <View
         style={{ flex: 1, alignContent: "center", justifyContent: "center" }}
@@ -403,7 +416,7 @@ export default function App() {
           >
             <TouchableOpacity onPress={handleStopButton}>
               <Image
-                source={require("../assets/images/stopButton.png")}
+                source={require("../assets/images/stopButtonNew.png")}
                 style={{ width: 70, height: 70 }}
                 resizeMode="contain"
               />
@@ -440,8 +453,8 @@ export default function App() {
               <Image
                 source={
                   isListening
-                    ? require("../assets/images/pauseButton.png")
-                    : require("../assets/images/playButton.png")
+                    ? require("../assets/images/pauseButtonNewNew.png")
+                    : require("../assets/images/playButtonNew.png")
                 }
                 style={{ width: 70, height: 70 }}
                 resizeMode="contain"

@@ -84,7 +84,7 @@ const App = () => {
       <ProfileBlobs height={'150%'} width={'150%'} bottom = {'-15%'} left = {'-80%'} position = {"absolute"} />
       <ProfileBlobss height={'180%'} width={'180%'} top = {'-70%'} left = {'-4%'} position = {"absolute"} />
       <ProfileBlobsss height={'200%'} width={'200%'} top = {'-20%'} left = {'5%'} position = {"absolute"} />
-      <Ellipse height={'35%'} width={'35%'} top = {'3%'} left = {'32%'} position = {"absolute"} />
+      <Ellipse height={'35%'} width={'35%'} top = {'3%'} left = {'32%'} position = {"absolute"} borderWidth = {20} borderColor = {'black'} />
 
       <ProfilePicture height={'20%'} width={'20%'} top = {'10%'} left = {'40%'} />
       <View style={styles.content}>
@@ -154,6 +154,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     top:70,
+    
+    
   },
   inputContainer: {
     flexDirection: "row",
@@ -164,7 +166,10 @@ const styles = StyleSheet.create({
     marginVertical: 25,
     top: -100,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: 10,
+    borderColor: "black",
+    borderWidth: 2,
+    height: '8%',
   },
   icon: {
     marginRight: 10,
