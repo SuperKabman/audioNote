@@ -16,29 +16,42 @@ const styles = StyleSheet.create({
   iconContainerFocusedIOS: {
     margin: '50%',
     width: '70%',
-    height:'10%',
-    backgroundColor: 'white',
+    height: '10%',
+    backgroundColor: '#14140F',
     borderRadius: 30,
-    paddingBottom:40,
-    paddingTop:10,
-    marginBottom:60,
+    paddingBottom: 40,
+    paddingTop: 10,
+    marginBottom: 60,
   },
   iconContainerFocusedAndroid: {
     margin: '5%',
     width: '60%',
-    backgroundColor: 'white',
+    backgroundColor: '#14140F',
     borderRadius: 30,
   },
   icon: {  
     width: 32,
     height: 32,
     marginBottom: Platform.OS === "ios" ? "12%" : "0%",
-    
   },
   iconFocused: {
-    width:32,
-    height:32,
+    width: 32,
+    height: 32,
     marginTop: Platform.OS === "ios" ? "40%" : "0%",
+  },
+  tabBarContainer: {
+    flex: 1,
+    backgroundColor: '#14140F',
+  },
+  tabBarStyle: {
+    backgroundColor: "#DADADA",
+    borderTopColor: "transparent",
+    borderRadius: 30,
+    height: "7%",
+    marginBottom: "5%",
+    shadowColor: "transparent",
+    margin: Platform.OS === "ios" ? "10%" : "5%",
+    padding: Platform.OS === "ios" ? "10%" : "0%",
   }
 });
 
@@ -47,47 +60,39 @@ interface TabIconProps {
   focused: boolean;
 }
 
-const TabIcon : React.FC<TabIconProps> = ({ icon, focused }) => {
+const TabIcon: React.FC<TabIconProps> = ({ icon, focused }) => {
   if (Platform.OS === 'ios') {
     return (
-      <View style = {[styles.iconContainer, focused && styles.iconContainerFocusedIOS]}>
+      <View style={[styles.iconContainer, focused && styles.iconContainerFocusedIOS]}>
         <Image
           source={icon}
           resizeMode="contain"
-          tintColor={focused ? "black" : "white"}
+          tintColor={focused ? "#DADADA" : "#14140F"}
           style={(focused ? styles.iconFocused : styles.icon)}
         />
       </View>
     );
   } else {
     return (
-      <View style = {[styles.iconContainer, focused && styles.iconContainerFocusedAndroid]}>
+      <View style={[styles.iconContainer, focused && styles.iconContainerFocusedAndroid]}>
         <Image
           source={icon}
           resizeMode="contain"
-          tintColor={focused ? "black" : "white"}
+          tintColor={focused ? "#DADADA" : "#14140F"}
           style={styles.icon}
         />
       </View>
     );
   }
 };
-const TabsLayout = () => {
 
+const TabsLayout = () => {
   return (
+    <View style={styles.tabBarContainer}>
       <Tabs
         screenOptions={{
           tabBarShowLabel: false,
-          tabBarStyle: {
-            backgroundColor: "black",
-            borderTopColor: "transparent",
-            borderRadius: 30,
-            height: "7%",
-            marginBottom: "5%",
-            shadowColor: "transparent",
-            margin: Platform.OS === "ios" ? "10%" : "5%",
-            padding: Platform.OS === "ios" ? "10%" : "0%",
-          },
+          tabBarStyle: styles.tabBarStyle,
         }}
       >
         <Tabs.Screen
@@ -104,7 +109,6 @@ const TabsLayout = () => {
             headerShown: false,
           }}
         />
-
         <Tabs.Screen
           name="home"
           options={{
@@ -134,6 +138,7 @@ const TabsLayout = () => {
           }}
         />
       </Tabs>
+    </View>
   );
 };
 

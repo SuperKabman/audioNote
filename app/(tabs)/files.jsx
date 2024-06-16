@@ -66,7 +66,7 @@ const Files = () => {
     if (!isSelectionMode) {
       router.push({
         pathname: "file_details",
-        params: { path: path, file_name: name},
+        params: { path: path, file_name: name },
       })
       console.log(`Directory ${path} clicked`);
     }
@@ -158,13 +158,13 @@ const Files = () => {
 
   return (
     <MenuProvider>
-      <SafeAreaView>
+      <SafeAreaView style={styles.safeArea}>
         <ScrollView>
           <View style={styles.container}>
             <View style={styles.menuContainer}>
               <Menu>
                 <MenuTrigger>
-                  <Ionicons name="ellipsis-vertical" size={32} color="black" />
+                  <Ionicons name="ellipsis-vertical" size={32} color="white" />
                 </MenuTrigger>
                 <MenuOptions>
                   <MenuOption onSelect={handleMenuDelete} text='Delete' />
@@ -179,7 +179,7 @@ const Files = () => {
                   styles.buttonContainer,
                   selectedItems.includes(directory.path) && styles.selectedButtonContainer
                 ]}
-                onPress={() => handleTapSelect(directory )}
+                onPress={() => handleTapSelect(directory)}
                 onLongPress={() => handleLongPress(directory)}
                 delayLongPress={200}
               >
@@ -217,6 +217,10 @@ const Files = () => {
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#14140f',
+  },
   container: {
     marginHorizontal: "2%",
     marginVertical: "10%",
@@ -230,8 +234,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "black",
-    backgroundColor: "black",
+    borderColor: "#DADADA",
+    backgroundColor: "#DADADA",
     padding: 15,
   },
   selectedButtonContainer: {
@@ -239,19 +243,19 @@ const styles = StyleSheet.create({
     borderColor: "grey",
   },
   heading: {
-    color: "white",
+    color: "#14140F",
     textAlign: "left",
     fontFamily: "IBMPlexMono-Medium",
     fontSize: 18,
     marginBottom: 5,
   },
   metadata: {
-    color: "grey",
+    color: "#3B3B37",
     textAlign: "left",
     fontFamily: "IBMPlexMono-Medium",
   },
   selectedText: {
-    color: "black",
+    color: "#14140F",
   },
 });
 
