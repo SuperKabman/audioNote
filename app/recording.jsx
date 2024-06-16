@@ -382,8 +382,8 @@ export default function App() {
     navigation.navigate("home");
   };
 
-  return isRecording ? (
-    <SafeAreaView style={{ flex: 1 }}>
+  return !isRecording ? (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#14140F" }}>
       <View
         style={{ flex: 1, alignContent: "center", justifyContent: "center" }}
       >
@@ -413,8 +413,8 @@ export default function App() {
             style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
           >
             <Image
-              source={require("../assets/images/blob_1.gif")}
-              style={{ width: 110, height: 110 }}
+              source={require("../assets/images/blob_2.gif")}
+              style={{ width: 110, height: 110, tintColor: "#DADADA"}}
               resizeMode="contain"
             />
             <Text
@@ -423,7 +423,7 @@ export default function App() {
                 position: "absolute",
                 top: "37%",
                 left: "37%",
-                color: "white",
+                color: "#14140F",
                 fontSize: 16,
               }}
             >
@@ -456,7 +456,7 @@ export default function App() {
     behavior={Platform.OS === "ios" ? "padding" : "height"}
     style={{ flex: 1 }}
   >
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#14140F" }}>
       <View style={{ position: 'absolute', top: '5%', left: "5%" }}>
         <TouchableOpacity onPress={handleBackButton}>
           <View
@@ -464,12 +464,12 @@ export default function App() {
               width: 40,
               height: 40,
               borderRadius: 20,
-              backgroundColor: 'black',
+              backgroundColor: '#dadada',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Back_icon height="20" width="20" fill="white" />
+            <Back_icon height="20" width="20" fill="#14140f" />
           </View>
         </TouchableOpacity>
       </View>
@@ -479,7 +479,7 @@ export default function App() {
           <Text
             style={{
               fontFamily: 'IBMPlexMono-SemiBold',
-              color: 'black',
+              color: 'white',
               fontSize: 30,
               textAlign: 'center',
               marginBottom: '7%',
@@ -492,7 +492,7 @@ export default function App() {
           <Text
             style={{
               fontFamily: 'IBMPlexMono-Regular',
-              color: 'grey',
+              color: '#DADADA',
               fontSize: 16,
               flex: 1,
             }}
@@ -515,7 +515,7 @@ export default function App() {
         >
           <TouchableOpacity onPress={handleSave}>
             <Image
-              source={require('../assets/images/blob_1.gif')}
+              source={require("../assets/images/blob_2.gif")}
               style={{ width: 110, height: 110 }}
               resizeMode="contain"
             />
@@ -525,7 +525,7 @@ export default function App() {
                 position: 'absolute',
                 top: '37%',
                 left: '10%',
-                color: 'white',
+                color: '#14140F',
                 fontSize: 16,
               }}
             >

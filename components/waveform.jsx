@@ -40,8 +40,8 @@ const Waveform = ({ waveform }) => {
             })}
             width={barWidth}
             height={animatedValues[index]}
-            fill="black"
-            stroke="black"
+            fill="#DADADA"
+            stroke="#DADADA"
             strokeWidth="1"
             rx={borderRadius}
             ry={borderRadius}
