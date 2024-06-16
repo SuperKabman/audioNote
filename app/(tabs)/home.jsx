@@ -53,7 +53,7 @@ return (
         </Text> 
       </TouchableOpacity>
       <TouchableOpacity onPress={handleProfile} style={{height:1}}>
-          <Profile top={-700} left={310} />
+          <Profile top={-680} left={310} />
                 {/* <TouchableOpacity onPress={handleProfile} style={{ height:1 }}>
         <Image source={icons.profile} style={{ top: -680, left: "80%" }} /> */}
 
@@ -61,8 +61,6 @@ return (
     </SafeAreaView>
   </SafeAreaView>
 );
-
-// ...
 };
 
 export default Home;

@@ -8,8 +8,7 @@ import Back_icon from "../assets/images/caret-left-solid.svg";
 import Ai_icon from "../assets/images/robot-solid.svg";
 import axios from "axios";
 import { LOCAL_IP_ADDRESS } from "../keys/config";
-import TranscriptionButton from "../assets/images/seeTranscriptionVSG.svg"
-import Listen from "../assets/images/audioTranscription.png"
+import TranscriptionButton from "../assets/images/audioTranscription2.svg"
 import {Image} from 'react-native'
 
 const FileDetails = () => {
@@ -203,7 +202,7 @@ const FileDetails = () => {
         justifyContent: "center",
       }}
     >
-      <TranscriptionButton height="65" width="65" fill="black" />
+      <Image source = {require('../assets/images/audioTranscriptionPNG.png')} style={{width: 70, height: 70}}/>
     </View>
   </TouchableOpacity>
   <TouchableOpacity onPress={handleAiButton}>
