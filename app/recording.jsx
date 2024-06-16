@@ -71,6 +71,7 @@ export default function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [settings, setSettings] = useState(null);
 
+
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -87,10 +88,9 @@ export default function App() {
   }, []);
 
   
-
-  if (!settings) {
-    return <Text>Loading Settings...</Text>
-  }
+  // if (!settings) {
+  //   return <Text>Loading Settings...</Text>
+  // }
 
   const getPermissions = async () => {
     const { status: micStatus } = await Audio.requestPermissionsAsync();
@@ -149,6 +149,7 @@ export default function App() {
   }
 
   const stopRecording = async () => {
+    console.log("settings: ", settings);
     try {
       console.log("Stopping recording...");
       await recordingVar.stopAndUnloadAsync();
@@ -165,6 +166,8 @@ export default function App() {
         type: Platform.OS === "ios" ? "audio/wav" : "audio/m4a",
         name: "recording.m4a",
       });
+
+      formData.append("settings", JSON.stringify(settings));
 
       const headers = {
         "Content-Type": "multipart/form-data",

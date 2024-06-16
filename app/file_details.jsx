@@ -8,18 +8,17 @@ import Back_icon from "../assets/images/caret-left-solid.svg";
 import Ai_icon from "../assets/images/robot-solid.svg";
 import axios from "axios";
 import { LOCAL_IP_ADDRESS } from "../keys/config";
-import TranscriptionButton from "../assets/images/audioTranscription2.svg"
-import {Image} from 'react-native'
+import { Image } from 'react-native';
 
 const FileDetails = () => {
   const { path, file_name } = useLocalSearchParams();
-
   const [transcription, setTranscription] = useState("");
   const [wordTimeMapping, setWordTimeMapping] = useState("");
   const [summary, setSummary] = useState("");
   const [selectedSentence, setSelectedSentence] = useState(null);
   const navigation = useNavigation();
   const router = useRouter();
+
   useEffect(() => {
     const fetchTranscription = async () => {
       try {
@@ -76,7 +75,7 @@ const FileDetails = () => {
       transcription: transcription,
       wordTimeMapping: wordTimeMapping,
     };
-  
+
     try {
       const response = await axios.post(
         `http://${LOCAL_IP_ADDRESS}:8080/find-summary-line`,
@@ -90,14 +89,13 @@ const FileDetails = () => {
       const targetSentence = response.data.matchingSentence;
       const startTime = response.data.startTime;
       const endTime = response.data.endTime;
-      console.log("target sentence:", targetSentence + "\n" + "start time: ", startTime + "\n" + "end time:", endTime) ;
+      console.log("target sentence:", targetSentence + "\n" + "start time: ", startTime + "\n" + "end time:", endTime);
 
       router.push({
         pathname: "showTranscription",
-        params: { path: path, targetSentence: targetSentence, startTime: response.data.startTime, endTime: response.data.endTime},
+        params: { path: path, targetSentence: targetSentence, startTime: response.data.startTime, endTime: response.data.endTime },
       });
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Failed to fetch summary line", error);
     }
   };
@@ -111,7 +109,7 @@ const FileDetails = () => {
     console.log("AI button clicked");
     router.push({
       pathname: "local_chat",
-      params: { transcription: transcription}
+      params: { transcription: transcription },
     });
   };
 
@@ -119,9 +117,9 @@ const FileDetails = () => {
     console.log("Transcription button clicked");
     router.push({
       pathname: "local_transcription",
-      params: {path: path}
+      params: { path: path },
     });
-  }
+  };
 
   const sentenceStyle = (sentence) => {
     return {
@@ -151,19 +149,19 @@ const FileDetails = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={{ flex: 1, marginHorizontal: "5%", marginTop: "15%"}}>
+      <View style={{ flex: 1, marginHorizontal: "5%", marginTop: "15%" }}>
         <Text
           style={{
             fontFamily: "IBMPlexMono-SemiBold",
             color: "white",
             fontSize: 30,
             textAlign: "center",
-            marginBottom: "7%",
+            marginBottom: "2%",
           }}
         >
           {file_name}
         </Text>
-        <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 150 }}>
           {summary.split(".").map((sentence, index) => (
             <TouchableOpacity
               key={index}
@@ -171,9 +169,7 @@ const FileDetails = () => {
               onLongPress={() => handleSentenceLongPress(sentence)}
               delayLongPress={300}
             >
-              <Text
-                style={sentenceStyle(sentence)}
-              >
+              <Text style={sentenceStyle(sentence)}>
                 {sentence.trim()}.{" "}
               </Text>
             </TouchableOpacity>
@@ -182,44 +178,46 @@ const FileDetails = () => {
       </View>
 
       <View
-  style={{
-    position: "absolute",
-    bottom: 40,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  }}
->
-<TouchableOpacity onPress={handleTranscriptionButton}>
-    <View
-      style={{
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        backgroundColor: "white",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Image source = {require('../assets/images/audioTranscriptionPNG.png')} style={{width: 70, height: 70}}/>
-    </View>
-  </TouchableOpacity>
-  <TouchableOpacity onPress={handleAiButton}>
-    <View
-      style={{
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        backgroundColor: "white",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Ai_icon height="40" width="40" fill="black" />
-    </View>
-  </TouchableOpacity>
-</View>
+        style={{
+          flex: 1,
+          position: "absolute",
+          bottom: 10,
+          left: 0,
+          right: 0,
+          flexDirection: "row",
+          justifyContent: "space-around",
+          alignItems: "center",
+        }}
+      >
+        <TouchableOpacity onPress={handleTranscriptionButton}>
+          <View
+            style={{
+              width: 70,
+              height: 70,
+              borderRadius: 35,
+              backgroundColor: "white",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Image source={require('../assets/images/audioTranscriptionPNG.png')} style={{ width: 70, height: 70 }} />
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleAiButton}>
+          <View
+            style={{
+              width: 70,
+              height: 70,
+              borderRadius: 35,
+              backgroundColor: "white",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ai_icon height="40" width="40" fill="black" />
+          </View>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };

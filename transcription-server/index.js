@@ -67,7 +67,8 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 
     const filePath = req.file.path;
     const fileType = req.file.mimetype;
-
+    const settings = req.body.settings; // imported the settings 
+    console.log("settings in backend:", settings);
     console.log("Uploaded file type:", fileType);
 
     // Check if the uploaded file is a WAV file (audio/vnd.wave)
