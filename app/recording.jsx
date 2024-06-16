@@ -20,7 +20,6 @@ import * as MediaLibrary from "expo-media-library";
 import Waveform from "../components/waveform";
 import RenameModal from "../components/rename_file";
 import { useNavigation } from "expo-router";
-
 import Back_icon from "../assets/images/caret-left-solid.svg";
 import { ScrollView } from "react-native";
 import { KeyboardAvoidingView } from "react-native";

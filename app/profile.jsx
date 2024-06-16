@@ -17,6 +17,13 @@ import { signOut } from "firebase/auth";
 import Scribble from "../assets/images/profileScribble1SVG.svg";
 import Scribbles from "../assets/images/profileScribble2SVG.svg"
 import Backbutton from "../assets/images/backbuttonSVG.svg";
+import ProfilePicture from "../assets/images/profilePictureSVG.svg";
+import Ellipse from "../assets/images/ellipseSVG.svg";
+import ProfileBlob  from "../assets/images/profileBlob1.svg";
+import ProfileBlobs  from "../assets/images/profileBlob2.svg";
+import ProfileBlobss  from "../assets/images/profileBlob3.svg";
+import ProfileBlobsss  from "../assets/images/profileBlob4.svg";
+
 
 const InputWithIcon = ({ iconName, placeholder, value }) => (
   <View style={styles.inputContainer}>
@@ -71,8 +78,15 @@ const App = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <Scribble height={500} width={500} top={-150} left = {-55} />
+    
+    <ImageBackground source={require('../assets/images/profileBackground.png')} style={styles.container}>
+      <ProfileBlob height={'200%'} width={'200%'} left = {'-70%'}  position = {"absolute"} />
+      <ProfileBlobs height={'150%'} width={'150%'} bottom = {'-15%'} left = {'-80%'} position = {"absolute"} />
+      <ProfileBlobss height={'180%'} width={'180%'} top = {'-70%'} left = {'-4%'} position = {"absolute"} />
+      <ProfileBlobsss height={'200%'} width={'200%'} top = {'-20%'} left = {'5%'} position = {"absolute"} />
+      <Ellipse height={'35%'} width={'35%'} top = {'3%'} left = {'32%'} position = {"absolute"} />
+
+      <ProfilePicture height={'20%'} width={'20%'} top = {'10%'} left = {'40%'} />
       <View style={styles.content}>
         <InputWithIcon
           iconName="user"
@@ -90,7 +104,7 @@ const App = () => {
           value={userData.phoneNumber}
         />
       </View>
-      <Scribbles height={500} width={500} left = {-55} />
+      
       <TouchableOpacity
         onPress={redirectHome}
         style={[styles.backButtonContainer, { width: 80, height: 32 }]}
@@ -100,7 +114,9 @@ const App = () => {
       <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
         <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
-    </View>
+      
+    </ImageBackground>
+  
   );
 };
 
@@ -108,7 +124,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-    backgroundColor: "white",
+    backgroundColor: "#DADADA",
+    
   },
   topShapeContainer: {
     width: "100%",
@@ -129,20 +146,21 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     backgroundColor: "lightgrey",
-    top: 75,
+    top: 500,
   },
   content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    top:70,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     width: "80%",
     height: 35,
-    backgroundColor: "lightgrey",
+    backgroundColor: "white",
     marginVertical: 25,
     top: -100,
     paddingHorizontal: 10,
@@ -159,14 +177,16 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   bottomShapeContainer: {
-    width: "100%",
-    height: "100%",
+    width: "10%",
+    height: "10%",
+    bottom: '100%',
   },
   bottomShape: {
     width: 500,
     height: 330,
     left: -50,
     bottom: -150,
+    bottom: 100,
   },
   backButtonContainer: {
     position: "absolute",
@@ -185,7 +205,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 5,
     marginVertical: 10,
-    bottom: 320,
+    bottom: 100,
     left: 40,
   },
   logoutButtonText: {

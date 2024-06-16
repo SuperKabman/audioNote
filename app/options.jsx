@@ -17,6 +17,7 @@ const App = () => {
     if (index === 0) return openLanguage;
     if (index === 1) return openConversationType;
     if (index === 2) return openTranslation;
+    if (index === 3) return openSummarySize;
     return false;
   };
 
@@ -102,7 +103,7 @@ const App = () => {
         />
       </View>
 
-      <Text style={styles.summaryText}>Custom Summary Prompt</Text>
+      <Text style={[styles.summaryText, isNextInvisible(3) && styles.invisible]}>Custom Summary Prompt</Text>
       <TextInput
         style={styles.textInput}
         multiline
@@ -198,7 +199,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   invisible: {
-    opacity: 0,
+    
+    left:'300%',
   }
 });
 

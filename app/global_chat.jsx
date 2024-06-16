@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   welcomeMessage: {
-    left: "0%",
+    left: "-4%",
     fontSize: 25,
     fontFamily: "IBMPlexMono-Medium",
     marginBottom: 20,
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   userMessage: {
     marginTop: 0,
-    left: "0%",
+    left: "-5%",
     fontSize: 18,
     fontFamily: "IBMPlexMono-Medium",
     marginBottom: 20,
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     
   },
   botMessage: {
-    left: "0%",
+    left: "-5%",
     fontSize: 18,
     fontFamily: "IBMPlexMono-Medium",
     marginBottom: 0,
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: "2%",
     width: "100%",
-    left: "0%",
+    left: "3%",
     
     
     
@@ -275,6 +275,7 @@ const styles = StyleSheet.create({
     width: "95%",
     bottom: "33%",
     left: "5%",
+    opacity: 0
   },
   input: {
     flex: 1,
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
   sendButton: {
     height: 42,
     width: 42,
-    left: "0%",
+    left: "-30%",
     bottom: '28%',
   },
 });
