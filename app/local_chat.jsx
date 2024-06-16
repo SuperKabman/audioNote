@@ -73,7 +73,8 @@ const local_chat = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+     
       <Image
         source={require("../assets/images/chatCanvas.png")}
         style={styles.canvas}
@@ -84,12 +85,11 @@ const local_chat = () => {
       >
         <Backbutton />
       </TouchableOpacity>
-      <KeyboardAvoidingView   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.inputContainer} >
       <ScrollView style={styles.messagesContainer}>
-      {messages.length === 0 ? (
+        {messages.length === 0 ? (
           <Text style={styles.welcomeMessage}>
-            Hi, ask me anything from this audionote.
+                        Hi, ask me anything from this audionote.
+
           </Text>
         ) : (
           messages.map((message, index) => (
@@ -100,9 +100,7 @@ const local_chat = () => {
           ))
         )}
       </ScrollView>
-      </KeyboardAvoidingView>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.inputContainer} >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}  style={styles.inputContainer}>
         <Image
           source={require("../assets/images/chatBar.png")}
           style={styles.chatBar}
@@ -124,7 +122,7 @@ const local_chat = () => {
           />
         </TouchableOpacity>
       </KeyboardAvoidingView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -132,16 +130,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "relative",
+    backgroundColor: "#DADADA",
   },
   welcomeMessage: {
-    left: "-4%",
     fontSize: 25,
     fontFamily: "IBMPlexMono-Medium",
     marginBottom: 20,
     color: "#A5A5A5",
     textAlign: "center",
-    top: "-15%",
     lineHeight: 60,
+    marginHorizontal: 5,
   },
   canvas: {
     position: "absolute",
@@ -153,46 +151,26 @@ const styles = StyleSheet.create({
   },
   backButtonContainer: {
     position: "absolute",
-    top: 48,
-    left: 20,
-  },
-  backButton: {
-    height: 32,
-    width: 80,
+    top: "5%",
+    left: "5%",
   },
   messagesContainer: {
     flex: 1,
-    padding: 20,
-    top:-5,
-    marginBottom: 60,
-    opacity: 20,
-    width: 100,
-    height: '90%',
-   
-    
+    marginTop: "30%",
+    marginHorizontal: "5%",
+    marginBottom: "30%",
   },
   userMessage: {
-    marginTop: 0,
-    left: "-5%",
     fontSize: 18,
     fontFamily: "IBMPlexMono-Medium",
     marginBottom: 20,
     color: "#A5A5A5",
-    width: 350,
-    top: 0,
-    
   },
   botMessage: {
-    left: "-5%",
     fontSize: 18,
     fontFamily: "IBMPlexMono-Medium",
-    marginBottom: 0,
+    marginBottom: 20,
     color: "white",
-    fontColor: "#A5A5A5", 
-    color: "white",
-    width: 350,
-    bottom: 10,
-    
   },
   inputContainer: {
     flexDirection: "row",
@@ -200,18 +178,15 @@ const styles = StyleSheet.create({
     padding: 10,
     position: "absolute",
     bottom: "2%",
-    width: "100%",
-    left: "3%",
-    
-    
-    
+    left: "2.5%",
+    width: "95%",
   },
   chatBar: {
     position: "absolute",
-    height: "65%",
-    width: "95%",
-    bottom: "33%",
-    left: "5%",
+    height: "100%",
+    width: "100%",
+    bottom: "0%",
+    left: "0%",
     opacity: 0,
   },
   input: {
@@ -223,8 +198,6 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     marginLeft: 10,
     marginRight: 10,
-    backgroundColor: "white",
-    bottom: '3%',
     borderRadius: 20,
   },
   sendButtonContainer: {
@@ -233,8 +206,6 @@ const styles = StyleSheet.create({
   sendButton: {
     height: 42,
     width: 42,
-    left: "-30%",
-    bottom: '28%',
   },
 });
 

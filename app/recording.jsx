@@ -86,6 +86,12 @@ export default function App() {
     loadSettings();
   }, []);
 
+  
+
+  if (!settings) {
+    return <Text>Loading Settings...</Text>
+  }
+
   const getPermissions = async () => {
     const { status: micStatus } = await Audio.requestPermissionsAsync();
     const { status: storageStatus } =

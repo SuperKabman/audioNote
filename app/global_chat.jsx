@@ -135,7 +135,7 @@ const Chat = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       {shouldRedirect && <Redirect href='/home' />}
       <Image
         source={require("../assets/images/chatCanvas.png")}
@@ -161,7 +161,7 @@ const Chat = () => {
           ))
         )}
       </ScrollView>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.inputContainer}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}  style={styles.inputContainer}>
         <Image
           source={require("../assets/images/chatBar.png")}
           style={styles.chatBar}
@@ -183,7 +183,7 @@ const Chat = () => {
           />
         </TouchableOpacity>
       </KeyboardAvoidingView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
