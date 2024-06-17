@@ -9,9 +9,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 const App = () => {
   const [language, setLanguage] = React.useState('English');
-  const [conversationType, setConversationType] = React.useState('Casual');
+  const [conversationType, setConversationType] = React.useState('Notes');
   const [translation, setTranslation] = React.useState('None');
-  const [summarySize, setSummarySize] = React.useState('Brief');
+  const [summarySize, setSummarySize] = React.useState('50-100');
   const [openLanguage, setOpenLanguage] = React.useState(false);
   const [openConversationType, setOpenConversationType] = React.useState(false);
   const [openTranslation, setOpenTranslation] = React.useState(false);
@@ -155,7 +155,7 @@ const App = () => {
             { label: 'Custom Prompt', value: 'Custom Prompt'},
             { label: 'Brief', value: 'Brief' },
             { label: 'Detailed', value: 'Detailed' },
-            { label: '50-100', valie: '50-100'},
+            { label: '50-100', value: '50-100'},
             { label: '100-200', value: '100-200' },
             { label: '200-300', value: '200-300' },
             { label: '300-500', value: '300-500' },
@@ -177,7 +177,7 @@ const App = () => {
         style={[styles.textInput, isNextInvisible(3) && styles.invisible]}
         multiline
         numberOfLines={4}
-        placeholder="Anything else our summarizing tool should know? Feel free to add anything ranging from custom summary sizes, conversation types, contexts, etc."
+        placeholder="Anything else our summarizing tool should know? Feel free to add anything ranging from custom summary sizes, conversation types, to contexts, etc."
         placeholderTextColor={'grey'}
         value={customSummaryPrompt}
         onChangeText={setCustomSummaryPrompt}
