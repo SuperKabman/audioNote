@@ -10,8 +10,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 const App = () => {
   const [language, setLanguage] = React.useState('English');
   const [conversationType, setConversationType] = React.useState('Notes');
-  const [translation, setTranslation] = React.useState('None');
-  const [summarySize, setSummarySize] = React.useState('50-100');
+  const [summarySize, setSummarySize] = React.useState('Brief');
   const [openLanguage, setOpenLanguage] = React.useState(false);
   const [openConversationType, setOpenConversationType] = React.useState(false);
   const [openTranslation, setOpenTranslation] = React.useState(false);
