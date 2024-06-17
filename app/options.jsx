@@ -3,6 +3,9 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'reac
 import DropDownPicker from 'react-native-dropdown-picker';
 import Reset from "../assets/images/resetButtonSVG.svg";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { KeyboardAvoidingView } from 'react-native';
+import { Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const App = () => {
   const [language, setLanguage] = React.useState('English');
@@ -69,7 +72,11 @@ const App = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAwareScrollView
+    resetScrollToCoords={{ x: 0, y: 0 }}
+    contentContainerStyle={styles.container}
+    scrollEnabled={false}
+  >
       <View style={styles.header}>
         <Reset style={styles.resetIcon} />
       </View>
@@ -82,6 +89,9 @@ const App = () => {
           items={[
             { label: 'English', value: 'English' },
             { label: 'Spanish', value: 'Spanish' },
+            { label: 'Hindi', value: 'Hindi'},
+            { label: 'French', value: 'French' },
+            { label: 'German', value: 'German' },
           ]}
           setOpen={handleOpenLanguage}
           setValue={setLanguage}
@@ -90,6 +100,7 @@ const App = () => {
           textStyle={styles.pickerText}
           zIndex={4000}
           zIndexInverse={1000}
+          dropDownContainerStyle={{height: 100}}
         />
       </View>
 
@@ -99,9 +110,11 @@ const App = () => {
           open={openConversationType}
           value={conversationType}
           items={[
-            { label: 'Casual', value: 'Casual' },
-            { label: 'Formal', value: 'Formal' },
-          ]}
+            { label: 'Notes', value: 'Notes' },
+            { label: 'Lectures', value: 'Lectures' },
+            { label: 'Discussions', value: 'Discussions'},
+            { label: 'Meeting', value:' Meeting'}
+            ]}
           setOpen={handleOpenConversationType}
           setValue={setConversationType}
           containerStyle={styles.pickerContainer}
@@ -109,6 +122,7 @@ const App = () => {
           textStyle={styles.pickerText}
           zIndex={3000}
           zIndexInverse={2000}
+          dropDownContainerStyle={{height: 100}}
         />
       </View>
 
@@ -128,6 +142,7 @@ const App = () => {
           textStyle={styles.pickerText}
           zIndex={2000}
           zIndexInverse={3000}
+          dropDownContainerStyle={{height: 100}}
         />
       </View>
 
@@ -137,8 +152,14 @@ const App = () => {
           open={openSummarySize}
           value={summarySize}
           items={[
+            { label: 'Custom Prompt', value: 'Custom Prompt'},
             { label: 'Brief', value: 'Brief' },
             { label: 'Detailed', value: 'Detailed' },
+            { label: '50-100', valie: '50-100'},
+            { label: '100-200', value: '100-200' },
+            { label: '200-300', value: '200-300' },
+            { label: '300-500', value: '300-500' },
+            { label: '500-1000', value: '500-1000' },
           ]}
           setOpen={handleOpenSummarySize}
           setValue={setSummarySize}
@@ -147,30 +168,33 @@ const App = () => {
           textStyle={styles.pickerText}
           zIndex={1000}
           zIndexInverse={4000}
+          dropDownContainerStyle={{height: 100}}
         />
       </View>
-
-      <Text style={[styles.summaryText, isNextInvisible(3) && styles.invisible]}>Custom Summary Prompt</Text>
+      
+      <Text style={[styles.summaryText, isNextInvisible(3) && styles.invisible]}>Custom Summary Prompt (Optional)</Text>
       <TextInput
-        style={styles.textInput}
+        style={[styles.textInput, isNextInvisible(3) && styles.invisible]}
         multiline
         numberOfLines={4}
-        placeholder=""
+        placeholder="Anything else our summarizing tool should know? Feel free to add anything ranging from custom summary sizes, conversation types, contexts, etc."
+        placeholderTextColor={'grey'}
         value={customSummaryPrompt}
         onChangeText={setCustomSummaryPrompt}
       />
+      
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
         <Text style={styles.saveButtonText}>Save Changes</Text>
       </TouchableOpacity>
-    </View>
+    </KeyboardAwareScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#14140F',
     padding: 20,
   },
   header: {
@@ -204,6 +228,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     width: '40%',
     left: '60%',
+    
   },
   picker: {
     backgroundColor: '#D3D3D3',
@@ -223,8 +248,9 @@ const styles = StyleSheet.create({
     height: 100,
     marginBottom: 20,
     top: '5%',
-    width: '80%',
-    left: '10%',
+    width: '100%',
+    height: '14%',
+    left: '0%',
   },
   saveButton: {
     backgroundColor: '#fff',
@@ -244,7 +270,7 @@ const styles = StyleSheet.create({
     fontFamily: 'IBMPlexMono-Medium',
     marginBottom: 6,
     top: '4%',
-    left: '21%',
+    left: '7%',
     fontSize: 16,
   },
   invisible: {

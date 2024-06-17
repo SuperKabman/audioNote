@@ -19,6 +19,12 @@ const openai = new OpenAI({
 app.use(cors());
 app.use(express.json());
 
+let conversationParameter = '';
+
+let summaryLength = '';
+
+let customUserPrompt = '';
+
 const transcriptionFilePath = path.join(
   __dirname,
   "./transcriptionFile(s)",
@@ -34,9 +40,9 @@ const generateResponseNote = async (Transcription) => {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: [{role:'system', content:'You are a summarizing tool for general audio-notes that a person might make at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio. And remember that you have to talk in a way that you are talking to the user, because that is who you interact with, that is who you help. You will always address the transcription as "the conversation".'},{ role: "user", content:Transcription }],
+      messages: [{role:'system', content:conversationParameter+'\n\n'+summaryLength+'\n\n'+customUserPrompt},{ role: "user", content:Transcription }],
     });
-
+    console.log('message:', conversationParameter+summaryLength+customUserPrompt);
     console.log("Generated response:", response.choices[0].message.content);
     return response.choices[0].message.content; 
   } catch (error) {
@@ -49,7 +55,7 @@ const generateTitle = async (Summary) => {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: [{role:'system', content:"You are a title generating bot. Your prompts are summaries of lectures/audionotes/meetings/discussions etc. You have to give a title to those summaries (essentially the notes) in 4 words or less."},{ role: "user", content:Summary }],
+      messages: [{role:'system', content:"You are a title generating bot. Your prompts are summaries of lectures/audionotes/meetings/discussions etc. You have to give a title to those summaries (essentially the notes) in 4 words or less. Only return the title as your response, nothing else, do not use quotations to return the title."},{ role: "user", content:Summary }],
     });
 
     console.log("Generated response:", response.choices[0].message.content);
@@ -67,10 +73,71 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
 
     const filePath = req.file.path;
     const fileType = req.file.mimetype;
-    const settings = req.body.settings; // imported the settings 
+    const settings = JSON.parse(req.body.settings); 
+    const language = settings.language;
+    const conversationType = settings.conversationType;
+    const translation = settings.translation;
+    const summarySize = settings.summarySize;
+    const customSummaryPrompt = settings.customSummaryPrompt;
+    customUserPrompt = customSummaryPrompt;
     console.log("settings in backend:", settings);
     console.log("Uploaded file type:", fileType);
 
+    var lang = '';
+
+    if (language === "English") {
+      lang = "en";
+    }
+    else if (language === "Spanish") {
+      lang = "es";
+    }
+    else if (language === "French") {
+      lang = "fr";
+    }
+    else if (language === "Hindi") {
+      lang = "hi";
+    }
+    else if (language === "German") {
+      lang = "de";
+    }
+
+    if (conversationType === "Notes") {
+      conversationParameter = 'You are a summarizing tool for general audio-notes that a person might make at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio. And remember that you have to talk in a way that you are talking to the user, because that is who you interact with, that is who you help. You will always address the transcription as "the conversation". If you ever get a very short audionote, ask the user to make a longer audionote, or say that the information was not enough to make an evaluate the audio. If you recieve a blank audionote, say that "the audio was empty" and ask the user to try again.';
+    }
+    else if (conversationType === "Lectures") {
+      conversationParameter = 'You are a summarizing tool for university lectures that a person might record for any class/subject/course or level of study. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio.And remember that you have to talk in a way that you are talking to the user, because that is who you interact with, that is who you help. You will always address the transcription as "the lecture”.If you ever get a very short audionote, ask the user to make a longer audionote, or say that the information was not enough to make an evaluate the audio. If you recieve a blank audionote, say that "the audio was empty" and ask the user to try again.';
+    }
+    else if (conversationType === "Discussions") {
+      conversationParameter = 'You are a summarizing tool for general discussions about anything that a person might have with anyone at any one or multiple people. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio. And remember that you have to talk in a way that you are talking to the user, because that is who you interact with, that is who you help. You will always address the transcription as "the discussion”.If you ever get a very short audionote, ask the user to make a longer audionote, or say that the information was not enough to make an evaluate the audio. If you recieve a blank audionote, say that "the audio was empty" and ask the user to try again.';
+    }
+    else if (conversationType === "Meeting") {
+      conversationParameter = 'You are a summarizing tool for formal or informal meetings that a person might record at any time of their day. Your responsibility is to summarize those audionotes without cutting any important information out of them. Keep in mind that these are audionotes, and some words might be unclear or seem out of context because of being a direct transcription of the audio. And remember that you have to talk in a way that you are talking to the user, because that is who you interact with, that is who you help. You will always address the transcription as "the meeting.If you ever get a very short audionote, ask the user to make a longer audionote, or say that the information was not enough to make an evaluate the audio. If you recieve a blank audionote, say that "the audio was empty" and ask the user to try again.';
+    }
+
+    if (summarySize === "Brief") {
+      summaryLength = 'You are a summarizing tool for short summaries. Your task is to summarize the conversation briefly.';
+    }
+    else if (summarySize === "Detailed") {
+      summaryLength = 'You are a summarizing tool for detailed summaries. Your task is to summarize the conversation in detailed sentences.';
+    }
+    else if (summarySize === "50-100") {
+      summaryLength = 'You are a summarizing tool. Your task is to summarize the conversation in 50-100 words.';
+    }
+    else if (summarySize === "100-200") {
+      summaryLength = 'You are a summarizing tool for summaries. Your task is to summarize the conversation in 100-200 words.';
+    }
+    else if (summarySize === "200-300") {
+      summaryLength = 'You are a summarizing tool for summaries. Your task is to summarize the conversation in 200-300 words.';
+    }
+    else if (summarySize === "300-500") {
+      summaryLength = 'You are a summarizing tool for summaries. Your task is to summarize the conversation in 300-500 words.';
+    }
+    else if (summarySize === "500-1000") {
+      summaryLength = 'You are a summarizing tool for summaries. Your task is to summarize the conversation in 500-1000 words.';
+    }
+    else if (summarySize === "Custom Prompt") {
+      summaryLength = '';
+    }
     // Check if the uploaded file is a WAV file (audio/vnd.wave)
     if (fileType === "audio/vnd.wave" || fileType === "audio/m4a") {
       const convertedFilePath = path.join(
@@ -91,7 +158,7 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
       const formData = new FormData();
       formData.append("file", fs.createReadStream(convertedFilePath));
       formData.append("model", "whisper-1");
-      formData.append("language", "en");
+      formData.append("language", lang);
       formData.append("response_format", "verbose_json");
 
       const headers = {
@@ -160,7 +227,7 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
       const formData = new FormData();
       formData.append("file", fs.createReadStream(filePath));
       formData.append("model", "whisper-1");
-      formData.append("language", "en");
+      formData.append("language", lang);
 
       const headers = {
         Authorization: `Bearer sk-proj-mwk4p3idrv3rzkJtElxFT3BlbkFJVjp4tnLPFWBuY5lj02qK`,

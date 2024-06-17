@@ -151,7 +151,7 @@ export default function App() {
   const stopRecording = async () => {
     console.log("settings: ", settings);
     try {
-      console.log("Stopping recording...");
+      console.log("Stopping recording..");
       await recordingVar.stopAndUnloadAsync();
       const uri = recordingVar.getURI();
       setUri(uri);

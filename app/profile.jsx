@@ -79,11 +79,11 @@ const App = () => {
 
   return (
     
-    <ImageBackground source={require('../assets/images/profileBackground.png')} style={styles.container}>
-      <ProfileBlob height={'200%'} width={'200%'} left = {'-70%'}  position = {"absolute"} />
-      <ProfileBlobs height={'150%'} width={'150%'} bottom = {'-15%'} left = {'-80%'} position = {"absolute"} />
+    <View  style={styles.container}>
+      <ProfileBlob height={'180%'} width={'180%'} left = {'-70%'} top = {'10%'}  position = {"absolute"} />
+      <ProfileBlobs height={'150%'} width={'150%'} bottom = {'-15%'} left = {'-100%'} position = {"absolute"} />
       <ProfileBlobss height={'180%'} width={'180%'} top = {'-70%'} left = {'-4%'} position = {"absolute"} />
-      <ProfileBlobsss height={'200%'} width={'200%'} top = {'-20%'} left = {'5%'} position = {"absolute"} />
+      <ProfileBlobsss height={'200%'} width={'200%'} top = {'-20%'} left = {'15%'} position = {"absolute"} />
       <Ellipse height={'35%'} width={'35%'} top = {'3%'} left = {'32%'} position = {"absolute"} borderWidth = {20} borderColor = {'black'} />
 
       <ProfilePicture height={'20%'} width={'20%'} top = {'10%'} left = {'40%'} />
@@ -115,7 +115,7 @@ const App = () => {
         <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
       
-    </ImageBackground>
+    </View>
   
   );
 };
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-    backgroundColor: "#DADADA",
+    backgroundColor: "#14140F",
     
   },
   topShapeContainer: {
