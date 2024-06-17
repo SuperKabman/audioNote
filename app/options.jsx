@@ -58,7 +58,6 @@ const App = () => {
       const settings = {
         language,
         conversationType,
-        translation,
         summarySize,
         customSummaryPrompt,
       };

@@ -5,16 +5,16 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert
-} from "react-native";
-import React, { useEffect, useState } from "react";
-import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
-import { useNavigation } from "@react-navigation/native";
+} from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { useNavigation } from '@react-navigation/native';
 import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
-import JSZip from "jszip";
+import { useRouter } from 'expo-router';
+import JSZip from 'jszip';
 
 const Files = () => {
   const [directories, setDirectories] = useState([]);
@@ -23,14 +23,10 @@ const Files = () => {
   const navigation = useNavigation();
   const router = useRouter();
 
-  useEffect(() => {
-    listDirectories();
-  }, []);
-
   const listDirectories = async () => {
-    console.log("Listing directories: " + FileSystem.documentDirectory);
+    console.log('Listing directories: ' + FileSystem.documentDirectory);
     try {
-      const recordingsPath = FileSystem.documentDirectory + "recordings";
+      const recordingsPath = FileSystem.documentDirectory + 'recordings';
       const items = await FileSystem.readDirectoryAsync(recordingsPath);
       const dirs = [];
 
@@ -55,19 +51,19 @@ const Files = () => {
           }
         }
       }
-      console.log("Directories in directory:", dirs);
+      console.log('Directories in directory:', dirs);
       setDirectories(dirs);
     } catch (error) {
-      console.error("Failed to list directories", error);
+      console.error('Failed to list directories', error);
     }
   };
 
   const handleDirectoryClick = (path, name) => {
     if (!isSelectionMode) {
       router.push({
-        pathname: "file_details",
+        pathname: 'file_details',
         params: { path: path, file_name: name },
-      })
+      });
       console.log(`Directory ${path} clicked`);
     }
   };
@@ -75,7 +71,7 @@ const Files = () => {
   const handleLongPress = (directory) => {
     setSelectedItems((prevSelectedItems) => {
       if (prevSelectedItems.includes(directory.path)) {
-        return prevSelectedItems.filter(item => item !== directory.path);
+        return prevSelectedItems.filter((item) => item !== directory.path);
       } else {
         return [...prevSelectedItems, directory.path];
       }
@@ -87,7 +83,7 @@ const Files = () => {
     if (isSelectionMode) {
       setSelectedItems((prevSelectedItems) => {
         if (prevSelectedItems.includes(directory.path)) {
-          return prevSelectedItems.filter(item => item !== directory.path);
+          return prevSelectedItems.filter((item) => item !== directory.path);
         } else {
           return [...prevSelectedItems, directory.path];
         }
@@ -113,13 +109,19 @@ const Files = () => {
 
   const handleMenuShare = async () => {
     try {
-      const tempDir = FileSystem.cacheDirectory + "temp_share/";
+      const tempDir = FileSystem.cacheDirectory + 'temp_share/';
       await FileSystem.makeDirectoryAsync(tempDir, { intermediates: true });
 
       for (const directoryPath of selectedItems) {
         const items = await FileSystem.readDirectoryAsync(directoryPath);
         for (const item of items) {
-          if (item.endsWith('.m4a') || item.endsWith('.wav') || item === 'summary.txt' || item === 'transcription.txt' || item === 'word_time_mapping.json') {
+          if (
+            item.endsWith('.m4a') ||
+            item.endsWith('.wav') ||
+            item === 'summary.txt' ||
+            item === 'transcription.txt' ||
+            item === 'word_time_mapping.json'
+          ) {
             const itemPath = `${directoryPath}/${item}`;
             const newFileName = `${directoryPath.split('/').pop()}_${item}`;
             const newFilePath = `${tempDir}/${newFileName}`;
@@ -132,13 +134,17 @@ const Files = () => {
       const tempItems = await FileSystem.readDirectoryAsync(tempDir);
       for (const item of tempItems) {
         const itemPath = `${tempDir}/${item}`;
-        const fileContent = await FileSystem.readAsStringAsync(itemPath, { encoding: FileSystem.EncodingType.Base64 });
+        const fileContent = await FileSystem.readAsStringAsync(itemPath, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
         zip.file(item, fileContent, { base64: true });
       }
 
       const zipContent = await zip.generateAsync({ type: 'base64' });
-      const tempZipPath = FileSystem.cacheDirectory + "sharedFiles.zip";
-      await FileSystem.writeAsStringAsync(tempZipPath, zipContent, { encoding: FileSystem.EncodingType.Base64 });
+      const tempZipPath = FileSystem.cacheDirectory + 'sharedFiles.zip';
+      await FileSystem.writeAsStringAsync(tempZipPath, zipContent, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
       await Sharing.shareAsync(tempZipPath);
 
@@ -152,9 +158,11 @@ const Files = () => {
     setIsSelectionMode(false);
   };
 
-  useEffect(() => {
-    listDirectories();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      listDirectories();
+    }, [])
+  );
 
   return (
     <MenuProvider>
@@ -177,7 +185,7 @@ const Files = () => {
                 key={index}
                 style={[
                   styles.buttonContainer,
-                  selectedItems.includes(directory.path) && styles.selectedButtonContainer
+                  selectedItems.includes(directory.path) && styles.selectedButtonContainer,
                 ]}
                 onPress={() => handleTapSelect(directory)}
                 onLongPress={() => handleLongPress(directory)}
@@ -186,7 +194,7 @@ const Files = () => {
                 <Text
                   style={[
                     styles.heading,
-                    selectedItems.includes(directory.path) && styles.selectedText
+                    selectedItems.includes(directory.path) && styles.selectedText,
                   ]}
                 >
                   {directory.name}
@@ -194,7 +202,7 @@ const Files = () => {
                 <Text
                   style={[
                     styles.metadata,
-                    selectedItems.includes(directory.path) && styles.selectedText
+                    selectedItems.includes(directory.path) && styles.selectedText,
                   ]}
                 >
                   {directory.recordingLength}
@@ -202,7 +210,7 @@ const Files = () => {
                 <Text
                   style={[
                     styles.metadata,
-                    selectedItems.includes(directory.path) && styles.selectedText
+                    selectedItems.includes(directory.path) && styles.selectedText,
                   ]}
                 >
                   {directory.recordingDate}
@@ -222,8 +230,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#14140f',
   },
   container: {
-    marginHorizontal: "2%",
-    marginVertical: "10%",
+    marginHorizontal: '2%',
+    marginVertical: '10%',
   },
   menuContainer: {
     alignItems: 'flex-end',
@@ -232,30 +240,30 @@ const styles = StyleSheet.create({
   buttonContainer: {
     margin: 10,
     borderRadius: 20,
-    overflow: "hidden",
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: "#DADADA",
-    backgroundColor: "#DADADA",
+    borderColor: '#DADADA',
+    backgroundColor: '#DADADA',
     padding: 15,
   },
   selectedButtonContainer: {
-    backgroundColor: "#4B4B4B",
-    borderColor: "white",
+    backgroundColor: '#4B4B4B',
+    borderColor: 'white',
   },
   heading: {
-    color: "#14140F",
-    textAlign: "left",
-    fontFamily: "IBMPlexMono-Medium",
+    color: '#14140F',
+    textAlign: 'left',
+    fontFamily: 'IBMPlexMono-Medium',
     fontSize: 18,
     marginBottom: 5,
   },
   metadata: {
-    color: "#3B3B37",
-    textAlign: "left",
-    fontFamily: "IBMPlexMono-Medium",
+    color: '#3B3B37',
+    textAlign: 'left',
+    fontFamily: 'IBMPlexMono-Medium',
   },
   selectedText: {
-    color: "#14140F",
+    color: '#14140F',
   },
 });
 
