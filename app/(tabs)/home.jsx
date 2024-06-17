@@ -52,6 +52,18 @@ return (
           Record
         </Text> 
       </TouchableOpacity>
+      <Text
+          style={{
+            fontFamily: "IBMPlexMono-Medium",
+            position: "absolute",
+            top: "75%",
+            left: "33%",
+            color: "grey",
+            fontSize: 16,
+          }}
+        >
+          Hold for Options
+        </Text>
       <TouchableOpacity onPress={handleProfile} style={{height:1}}>
           <Profile top={-680} left={310} />
                 {/* <TouchableOpacity onPress={handleProfile} style={{ height:1 }}>
