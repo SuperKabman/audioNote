@@ -126,27 +126,9 @@ const App = () => {
         />
       </View>
 
-      <View style={[styles.settingContainer, isNextInvisible(1) && styles.invisible]}>
-        <Text style={styles.label}>Translate{'\n'}Conversation to</Text>
-        <DropDownPicker
-          open={openTranslation}
-          value={translation}
-          items={[
-            { label: 'None', value: 'None' },
-            { label: 'Spanish', value: 'Spanish' },
-          ]}
-          setOpen={handleOpenTranslation}
-          setValue={setTranslation}
-          containerStyle={styles.pickerContainer}
-          style={styles.picker}
-          textStyle={styles.pickerText}
-          zIndex={2000}
-          zIndexInverse={3000}
-          dropDownContainerStyle={{height: 100}}
-        />
-      </View>
+      
 
-      <View style={[styles.settingContainer, isNextInvisible(2) && styles.invisible]}>
+      <View style={[styles.settingContainer, isNextInvisible(1) && styles.invisible]}>
         <Text style={styles.label}>Summary Size{'\n'}& Depth</Text>
         <DropDownPicker
           open={openSummarySize}
