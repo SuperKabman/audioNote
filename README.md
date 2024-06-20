@@ -23,9 +23,30 @@ AudioNote is an innovative app designed to enhance your note-taking and informat
 
 ## Visual Appeal Of The App
 
-/Demo_Images/LoginPage.PNG
+<img src = "./Demo_Images/loginPage.PNG" width = "200">
+&nbsp
+<img src = "./Demo_Images/signUpPage.PNG" width = "200">
+&nbsp
+<img src = ".\Demo_Images\optionsPage.PNG" width = "200">
+&nbsp
+<img src = ".\Demo_Images\homePageAnimation.gif" width = "200">
+&nbsp
+<img src = ".\Demo_Images\RecordingPage.png" width = "200">
+&nbsp
+<img src = ".\Demo_Images\savePage.png" width = "200">
+&nbsp
+<img src = ".\Demo_Images\filesPage.PNG" width = "200">
+&nbsp
+<img src = ".\Demo_Images\audioPlaybackPage.PNG" width = "200">
+&nbsp
+<img src = ".\Demo_Images\chatWindow.PNG" width = "200">
 
 
+## Demo Video
+
+<video width = "300" controls>
+<source src = ".\Demo_Images\audioNoteDemoVideo.mp4">
+</video>
 
 ## How To Start The Project For Yourself
 
