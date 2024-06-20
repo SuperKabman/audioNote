@@ -1,6 +1,6 @@
 # AudioNote
 
-AudioNote is an innovative app designed to enhance your note-taking and information-sharing experience. Leveraging OpenAI's Whisper API, AudioNote records conversations and seamlessly converts them into text. It then utilizes the powerful GPT model to summarize those conversations concisely. Additionally, AudioNote features an integrated AI chatbot that can answer any questions you have about the audio notes recorded by the user. You can also share your AudioNotes with anyone, including the summary and transcription. Whether for meetings, lectures, or personal reminders, AudioNote ensures you never miss important details, making your life more organized and efficient.
+AudioNote is an innovative app designed to enhance your note-taking and information-sharing experience. Leveraging OpenAI's Whisper API, AudioNote records conversations and seamlessly converts them into text 🗣️➡️📜. It then utilizes the powerful GPT model to summarize those conversations concisely. Additionally, AudioNote features an integrated AI chatbot that can answer any questions you have about the audio notes recorded by the user 🤖💬. You can also share your AudioNotes with anyone, including the summary and transcription. Whether for meetings, lectures, or personal reminders, AudioNote ensures you never miss important details, making your life more organized and efficient 📅🗂️.
 
 ## Features Of The App
 
@@ -10,7 +10,7 @@ AudioNote is an innovative app designed to enhance your note-taking and informat
 4. __AI Chatbot:__ Ask questions about your recorded audio notes and receive insightful answers from the integrated AI chatbot.
 5. __Easy Sharing:__ Share your AudioNotes, including the summary and transcription, with anyone effortlessly.
 
-## Tech Stack Used
+## Tech Stack Used 💻🌐
 
 1. React Native (front end)
 2. Node.js (backend)
