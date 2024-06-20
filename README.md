@@ -21,32 +21,24 @@ AudioNote is an innovative app designed to enhance your note-taking and informat
 7. Google Cloud Compute Engine (hosting backend)
 8. NativeWind (styling)
 
+
 ## Visual Appeal Of The App
 
-<img src = "./Demo_Images/loginPage.PNG" width = "200">
-&nbsp
-<img src = "./Demo_Images/signUpPage.PNG" width = "200">
-&nbsp
-<img src = ".\Demo_Images\optionsPage.PNG" width = "200">
-&nbsp
-<img src = ".\Demo_Images\homePageAnimation.gif" width = "200">
-&nbsp
-<img src = ".\Demo_Images\RecordingPage.png" width = "200">
-&nbsp
-<img src = ".\Demo_Images\savePage.png" width = "200">
-&nbsp
-<img src = ".\Demo_Images\filesPage.PNG" width = "200">
-&nbsp
-<img src = ".\Demo_Images\audioPlaybackPage.PNG" width = "200">
-&nbsp
-<img src = ".\Demo_Images\chatWindow.PNG" width = "200">
-
+<div style="display: flex; flex-wrap: wrap; gap: 40px;">
+  <img src="./Demo_Images/loginPage.PNG" width="200">
+  <img src="./Demo_Images/signUpPage.PNG" width="200">
+  <img src="./Demo_Images/optionsPage.PNG" width="200">
+  <img src="./Demo_Images/homePageAnimation.gif" width="200">
+  <img src="./Demo_Images/RecordingPage.png" width="200">
+  <img src="./Demo_Images/savePage.png" width="200">
+  <img src="./Demo_Images/filesPage.PNG" width="200">
+  <img src="./Demo_Images/audioPlaybackPage.PNG" width="200">
+  <img src="./Demo_Images/chatWindow.PNG" width="200">
+</div>
 
 ## Demo Video
 
-<video width = "300" controls>
-<source src = ".\Demo_Images\audioNoteDemoVideo.mp4">
-</video>
+https://github.com/SuperKabman/audioNote/blob/main/Demo_Images/audioNoteDemoVideo.mp4
 
 ## How To Start The Project For Yourself
 
