@@ -1,50 +1,52 @@
-# Welcome to your Expo app 👋
+# AudioNote
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+AudioNote is an innovative app designed to enhance your note-taking and information-sharing experience. Leveraging OpenAI's Whisper API, AudioNote records conversations and seamlessly converts them into text. It then utilizes the powerful GPT model to summarize those conversations concisely. Additionally, AudioNote features an integrated AI chatbot that can answer any questions you have about the audio notes recorded by the user. You can also share your AudioNotes with anyone, including the summary and transcription. Whether for meetings, lectures, or personal reminders, AudioNote ensures you never miss important details, making your life more organized and efficient.
 
-## Get started
+## Features Of The App
+
+1. __Realtime Summaries:__ Get instant summaries of any recorded conversation, complete with an auto-generated title.
+2. __Customizable Settings:__ Adjust parameters such as Conversation Language, Conversation Type, Summary Size and Depth, and even use a custom summary prompt for enhanced summarization.
+3. __Highlighted Transcriptions:__ Play back your recorded audio while the corresponding transcription is highlighted in real-time, similar to Spotify's lyrics feature.
+4. __AI Chatbot:__ Ask questions about your recorded audio notes and receive insightful answers from the integrated AI chatbot.
+5. __Easy Sharing:__ Share your AudioNotes, including the summary and transcription, with anyone effortlessly.
+
+## Tech Stack Used
+
+1. React Native (front end)
+2. Node.js (backend)
+3. Expo
+4. Whisper API (transcription)
+5. GPT 3.5 API (chatBot and summarization)
+6. Firebase Authenticator (user authentication)
+7. Google Cloud Compute Engine (hosting backend)
+8. NativeWind (styling)
+
+## Visual Appeal Of The App
+
+/Demo_Images/LoginPage.PNG
+
+
+
+## How To Start The Project For Yourself
 
 1. Install dependencies
 
    ```bash
    npm install
    ```
-
-2. Start the app
+2. Get API Keys from OpenAI and replace them in the code
+3. Replace ``` LOCAL_IP_ADDRESS ``` with your machine's IP address
+5. Start the app
 
    ```bash
     npx expo start
    ```
+6. Go to the server files directory and start the server
 
-In the output, you'll find options to open the app in a
+   ```bash
+   cd transcription-server
+   node index.js
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
