@@ -38,7 +38,7 @@ AudioNote is an innovative app designed to enhance your note-taking and informat
 
 ## Demo Video
 
-https://github.com/SuperKabman/audioNote/blob/main/Demo_Images/audioNoteDemoVideo.mp4
+https://www.linkedin.com/posts/siddharth-yadav-491868287_innovation-ai-productivity-activity-7209520304316903425-eo4H?utm_source=share&utm_medium=member_desktop
 
 ## How To Start The Project For Yourself
 
